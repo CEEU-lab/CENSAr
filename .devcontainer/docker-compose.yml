@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+    devcontainer:
+        network_mode: host
+        image: censar-devcontainer
+        container_name: censar-devcontainer-cpu
+        build:
+            context: ..
+            dockerfile: .devcontainer/Dockerfile
+            args:
+                - USER_NAME=vscode
+                - USER_UID=1000
+                - USER_GID=1000
+        shm_size: "8gb"
+        volumes:
+            - ..:/workspace:cached
+            - ../notebooks/:/notebooks
+            - ../resources/:/resources
+            - $HOME/.ssh/:/home/vscode/.ssh
+            - $HOME/.gitconfig:/home/vscode/.gitconfig
+        command: /bin/sh -c "while sleep 1000; do :; done"
+        env_file:
+            - ../.env

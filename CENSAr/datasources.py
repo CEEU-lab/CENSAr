@@ -30,8 +30,8 @@ def radios_caba_2010(root=carto_dir):
     return radios
 
 @st.cache_data
-def radios_corrientes(year, root=carto_dir, mask=None):
-    path = f"{root}radios_{year}_corrientes.zip"
+def radios_prov(year, prov, root=carto_dir, mask=None):
+    path = f"{root}radios_{year}_{prov}.zip"
     radios = gpd.read_file(path)
 
     if mask is not None:
@@ -42,10 +42,34 @@ def radios_corrientes(year, root=carto_dir, mask=None):
     return radios
 
 @st.cache_data
-def tipoviv_radios_corrientes(year, var_types, root=data_dir):
-    path = f"{root}tipo_vivienda_radios_corrientes_{year}.csv"
-    tipoviv_radio = pd.read_csv(path, var_types)
+def radios_precenso_2020(root=carto_dir, mask=None):
+    path = f"{root}radios_precenso_2020.zip"
+    radios = gpd.read_file(path)
+    
+    if mask is not None:
+        if mask.crs != radios.crs:
+            mask = mask.to_crs(radios.crs)
+        radios = radios.clip(mask)
+        
+    return radios
+
+@st.cache_data
+def tipoviv_radios_prov(year, prov, var_types, root=data_dir):
+    path = f"{root}tipo_vivienda_radios_{prov}_{year}.csv"
+    tipoviv_radio = pd.read_csv(path, dtype=var_types)
     return tipoviv_radio
+
+@st.cache_data
+def regtenviv_radios_prov(year, prov, var_types, root=data_dir):
+    path = f"{root}reg_tenencia_viv_radios_{prov}_{year}.csv"
+    regtenviv_radio = pd.read_csv(path, dtype=var_types)
+    return regtenviv_radio
+
+@st.cache_data
+def desagueinod_radios_prov(year, prov, var_types, root=data_dir):
+    path = f"{root}desagueinod_radios_{prov}_{year}.csv"
+    desagueinod_radio = pd.read_csv(path, dtype=var_types)
+    return desagueinod_radio
 
 @st.cache_data
 def inmat_radios_gba24_2010(root=data_dir):

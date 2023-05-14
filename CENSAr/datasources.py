@@ -42,10 +42,20 @@ def radios_prov(year, prov, root=carto_dir, mask=None):
     return radios
 
 @st.cache_data
-def radios_precenso_2020(root=carto_dir, mask=None):
+def radios_precenso_2020(root, geo_filter=None, mask=None):
+    """
+    geo_filter (dict): nomprov + nomdepto (e.g. {'prov':'18', 'depto':'021'})
+    mask (Polygon): shapely's polygon geometry
+    """
     path = f"{root}radios_precenso_2020.zip"
     radios = gpd.read_file(path)
     
+    #1. Filtra radios dentro del departamento
+    if geo_filter is not None:
+      radios = radios.loc[(radios['prov']==geo_filter['prov']) &
+                           (radios['depto']==geo_filter['depto'])].copy()
+
+    #2. Selección de radios por envolvente o mancha
     if mask is not None:
         if mask.crs != radios.crs:
             mask = mask.to_crs(radios.crs)

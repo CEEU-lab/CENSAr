@@ -93,3 +93,8 @@ def inmat_radios_caba_2010(root=data_dir):
     inmat_por_radio = pd.read_csv(path)
     return inmat_por_radio
 
+@st.cache_data
+def conversion_radios_0110(prov, var_types,root=data_dir):
+    path = f"{root}{prov}_conversion_010.csv"
+    conversion_radios = pd.read_csv(path, dtype=var_types)
+    return conversion_radios

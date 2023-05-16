@@ -60,25 +60,38 @@ def radios_precenso_2020(root, geo_filter=None, mask=None):
         if mask.crs != radios.crs:
             mask = mask.to_crs(radios.crs)
         radios = radios.clip(mask)
-        
+    
+    #3. Columnas legibles
+    radios.rename(columns={'ind01':'total_viviendas', 
+                           'ind05':'viviendas_tipo_casa', 
+                           'ind06':'viviendas_tipo_depto', 
+                           'ind07':'depto_alt_monob'}, inplace=True)
+    
+    radios['total_viviendas'] = radios['total_viviendas'].astype(int)
+    radios['viviendas_tipo_casa'] = radios['viviendas_tipo_casa'].astype(float)
+    radios['viviendas_tipo_depto'] = radios['viviendas_tipo_depto'].astype(float)
+    radios['depto_alt_monob'] = radios['depto_alt_monob'].astype(float)
     return radios
 
 @st.cache_data
 def tipoviv_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}tipo_vivienda_radios_{prov}_{year}.csv"
     tipoviv_radio = pd.read_csv(path, dtype=var_types)
+    tipoviv_radio.columns= tipoviv_radio.columns.str.lower()
     return tipoviv_radio
 
 @st.cache_data
 def regtenviv_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}reg_tenencia_viv_radios_{prov}_{year}.csv"
     regtenviv_radio = pd.read_csv(path, dtype=var_types)
+    regtenviv_radio.columns= regtenviv_radio.columns.str.lower()
     return regtenviv_radio
 
 @st.cache_data
 def desagueinod_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}desagueinod_radios_{prov}_{year}.csv"
     desagueinod_radio = pd.read_csv(path, dtype=var_types)
+    desagueinod_radio.columns= desagueinod_radio.columns.str.lower()
     return desagueinod_radio
 
 @st.cache_data

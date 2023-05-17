@@ -72,6 +72,7 @@ def named_aggregation(
 def aggregate(
     data: gpd.GeoDataFrame | pd.DataFrame,
     schema: list[Mapping],
+    errors: str = "skip",
 ) -> gpd.GeoDataFrame | pd.DataFrame:
     """
     Aggregate data according to a schema.
@@ -84,6 +85,11 @@ def aggregate(
         Schema to be used for aggregation.
     aggregator : str | Callable[..., pd.Series | gpd.GeoSeries], optional
         Aggregation function to be used, by default "sum".
+    errors : str, optional
+        How to handle errors, by default "skip".
+        could be:
+            - "raise": raise an error
+            - "skip": skip the column
 
     Returns
     -------
@@ -98,6 +104,7 @@ def aggregate(
 
     data = data.copy()
 
+    original_columns = data.columns
     for mapping in schema:
         mapping = Mapping(**mapping) if isinstance(mapping, dict) else mapping
         columns = mapping.columns
@@ -107,6 +114,14 @@ def aggregate(
 
         if not columns:
             raise ValueError(f"No columns found for mapping {mapping.name}")
+
+        if extra_columns := set(columns) - set(original_columns):
+            msg = f"Extra columns found for mapping {mapping.name}: {extra_columns}"
+            if errors == "raise":
+                raise ValueError(msg)
+            elif errors == "skip":
+                logger.warning(f"{msg}. Extra columns will be ignored.")
+                columns = list(set(columns) - extra_columns)
 
         data[mapping.name] = data[columns].aggregate(mapping.aggregator, axis=1)
         data.drop(columns, axis=1, inplace=True)

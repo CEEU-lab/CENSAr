@@ -1,0 +1,36 @@
+Tipo vivienda particular:
+  type: category
+  mapping:
+    Informal:
+      - Rancho
+      - Casilla
+      - Local no construido para habitacion
+    Formal:
+      - Casa
+      - Departamento
+      - Pieza Inquilinato
+      - Hotel pension
+      - Vivienda movil
+    Situacion de calle:
+      - Persona viviendo en la calle
+
+
+Calidad de conexiones a servicios:
+  type: category
+  mapping:
+    Insatisfactoria:
+      - Insuficiente
+    Satisfactoria:
+      - Satisfactoria
+      - Básica
+
+Calidad de los materiales:
+  type: category
+  mapping:
+    Aceptable:
+      - Calidad 1
+    Recuperable:
+      - Calidad 2
+    Irrecuperable:
+      - Calidad 3
+      - Calidad 4

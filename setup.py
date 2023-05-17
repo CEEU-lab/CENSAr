@@ -28,5 +28,6 @@ setup(
         "mapclassify == 2.5.0",
         "pydantic==1.10.7",
         "geopandas==0.13.0",
+        "srsly==2.4.6",
     ],
 )

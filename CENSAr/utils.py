@@ -7,59 +7,6 @@ import pandas as pd
 import geopandas as gpd
 
 
-def reformat_inmat_2010(gdf):
-    gdf["aceptables"] = gdf["Cal1"]
-    gdf["recuperables"] = gdf["Cal2"]
-    gdf["irrecuperables"] = gdf["Cal3"] + gdf["Cal4"]
-    gdf["total_inmat"] = gdf["aceptables"] + gdf["recuperables"] + gdf["irrecuperables"]
-    columns = [c for c in gdf.columns if c != "geometry"]
-    gdf_ = gdf[columns + ["geometry"]]
-    return gdf_
-
-
-def aggregate(
-    data: gpd.GeoDataFrame | pd.DataFrame,
-    mapping: dict[str, list[str]],
-    aggregator: str | Callable[..., pd.Series] = "sum",
-    groupby: str | list[str] = "LINK",
-) -> dict[str, gpd.GeoDataFrame | pd.DataFrame]:
-    """
-    Group a dataframe by a column and aggregate the values of the columns
-    specified in the mapping.
-
-    Parameters
-    ----------
-    data : gpd.GeoDataFrame | pd.DataFrame
-        Dataframe to group.
-    mapping : dict[str, list[str]]
-        Mapping of the columns to aggregate.
-    aggregator : str | Callable[..., pd.Series], optional
-        Aggregation method, by default "sum".
-    groupby : str | list[str], optional
-        Column to group by, by default "LINK".
-
-    Returns
-    -------
-    dict[str, gpd.GeoDataFrame | pd.DataFrame]
-        Dictionary with the grouped dataframes.
-    """
-
-    data = deepcopy(data)
-    data.set_index(groupby, inplace=True)
-    for new_key, old_keys in mapping.items():
-        data[new_key] = data[old_keys].aggregate(aggregator, axis=1)  # type: ignore
-        data.drop(columns=old_keys, inplace=True)
-
-    total = data.sum(axis=1)
-
-    df_pct = data.div(total, axis=0) * 100
-
-    data["total"] = total
-    df_pct["total"] = total
-
-    return {"df_tot": data.reset_index(), "df_pct": df_pct.reset_index()}
-
-
 def plot_folium_dual_choroplet(
     gdf_inferior,
     gdf_superior,

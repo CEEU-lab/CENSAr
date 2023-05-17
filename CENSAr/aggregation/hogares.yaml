@@ -1,0 +1,88 @@
+Material predominante de los pisos:
+  mapping:
+    - name: Informal
+      columns:
+        - Tierra o ladrillo suelto
+        - Otro
+    - name: Formal
+      columns:
+        - Cerámica
+        - Baldosa
+        - Mosaico
+        - Mármol
+        - Madera o alfombrado
+        - Cemento o ladrillo fijo
+
+Material predominante de la cubierta exterior del techo:
+  mapping:
+    - name: Informal
+      columns:
+        - Chapa fibrocemento o plástico
+        - Chapa de cartón
+        - Caña, palma, tabla o paja con o sin barro
+        - Otro
+    - name: Formal
+      columns:
+        - Cubierta asfáltica o membrana
+        - Baldosa o losa (sin cubierta)
+        - Pizarra o teja
+        - Chapa de metal (sin cubierta)
+
+Procedencia del agua para beber y cocinar:
+  mapping:
+    - name: Informal
+      columns:
+        - Perforación con bomba a motor
+        - Perforación con bomba manual
+        - Pozo
+        - Transporte por cisterna
+        - Agua de lluvia, río, canal, arroyo o acequia
+    - name: Formal
+      columns:
+        - Red pública
+
+Desague del inodoro:
+  mapping:
+    - name: Informal
+      columns:
+        - Sólo a pozo ciego
+        - A hoyo, excavación en la tierra, etc.
+    - name: Formal
+      columns:
+        - A red pública (cloaca)
+        - A cámara séptica y pozo ciego
+
+Combustible usado principalmente para cocinar:
+  mapping:
+    - name: Informal
+      columns:
+        - Leña o carbón
+        - Otro
+    - name: Formal
+      columns:
+        - Gas a granel (zeppelin)
+        - Gas en tubo
+        - Gas en garrafa
+        - Electricidad
+
+Regimen de tenencia:
+  mapping:
+    - name: Informal
+      columns:
+        - Propietario solo de la vivienda
+        - Otra situación
+    - name: Formal
+      columns:
+        - Propietario de la vivienda y del terreno
+        - Inquilino
+        - Ocupante por préstamo
+        - Ocupante por trabajo
+
+Hacinamiento:
+  mapping:
+    - name: Informal
+      columns:
+        - Más de 3 personas por cuarto
+    - name: Formal
+      columns:
+        - Entre 0.5 y 3 personas por cuarto

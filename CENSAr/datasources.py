@@ -95,6 +95,13 @@ def desagueinod_radios_prov(year, prov, var_types, root=data_dir):
     return desagueinod_radio
 
 @st.cache_data
+def personas_radios_prov(year, prov, var_types, root=data_dir):
+    path = f"{root}personas_radios_{prov}_{year}.csv"
+    personas_radio = pd.read_csv(path, dtype=var_types)
+    personas_radio.columns= personas_radio.columns.str.lower()
+    return personas_radio
+
+@st.cache_data
 def inmat_radios_gba24_2010(root=data_dir):
     path = f"{root}inmat_gba24.csv"
     inmat_por_radio = pd.read_csv(path)
@@ -107,7 +114,13 @@ def inmat_radios_caba_2010(root=data_dir):
     return inmat_por_radio
 
 @st.cache_data
-def conversion_radios_0110(prov, var_types,root=data_dir):
+def tracts_matching_0110(prov, var_types,root=data_dir):
     path = f"{root}{prov}_conversion_010.csv"
     conversion_radios = pd.read_csv(path, dtype=var_types)
     return conversion_radios
+
+@st.cache_data
+def persproy_depto_2025(prov, root=data_dir):
+    path = f"{root}persproyect_depto_{prov}.csv"
+    proyecciones_pobl = pd.read_csv(path, index_col='Departamento')
+    return proyecciones_pobl

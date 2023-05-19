@@ -1,9 +1,17 @@
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
+import unicodedata
+
 
 data_dir = 'https://storage.googleapis.com/python_mdg/censar_data/'
 carto_dir = 'https://storage.googleapis.com/python_mdg/censar_carto/'
+
+
+def text_normalize(text: str) -> str:
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+    text = text.lower()
+    return text
 
 @st.cache_data
 def caba_neighborhood_limits(root=carto_dir):
@@ -82,26 +90,32 @@ def radios_eph_censo_2010(aglo_idx, root=carto_dir):
 def tipoviv_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}tipo_vivienda_radios_{prov}_{year}.csv"
     tipoviv_radio = pd.read_csv(path, dtype=var_types)
-    tipoviv_radio.columns= tipoviv_radio.columns.str.lower()
+    tipoviv_radio.columns = [text_normalize(c) for c in tipoviv_radio.columns]
     return tipoviv_radio
 
 def regtenviv_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}reg_tenencia_viv_radios_{prov}_{year}.csv"
     regtenviv_radio = pd.read_csv(path, dtype=var_types)
-    regtenviv_radio.columns= regtenviv_radio.columns.str.lower()
+    regtenviv_radio.columns = [text_normalize(c) for c in regtenviv_radio.columns]
     return regtenviv_radio
 
 def desagueinod_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}desagueinod_radios_{prov}_{year}.csv"
     desagueinod_radio = pd.read_csv(path, dtype=var_types)
-    desagueinod_radio.columns= desagueinod_radio.columns.str.lower()
+    desagueinod_radio.columns = [text_normalize(c) for c in desagueinod_radio.columns]
     return desagueinod_radio
 
 def personas_radios_prov(year, prov, var_types, root=data_dir):
     path = f"{root}personas_radios_{prov}_{year}.csv"
     personas_radio = pd.read_csv(path, dtype=var_types)
-    personas_radio.columns= personas_radio.columns.str.lower()
+    personas_radio.columns = [text_normalize(c) for c in personas_radio.columns]
     return personas_radio
+
+def servurban_radios_prov(prov, var_types, root=data_dir):
+    path = f"{root}servurbanos_radios_{prov}_2001.csv"
+    servurban_radio = pd.read_csv(path, dtype=var_types)
+    servurban_radio.columns = [text_normalize(c) for c in servurban_radio.columns]
+    return servurban_radio
 
 @st.cache_data
 def inmat_radios_gba24_2010(root=data_dir):

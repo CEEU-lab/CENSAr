@@ -52,7 +52,8 @@
 				"christian-kohler.path-intellisense",
 				"magicstack.magicpython",
 				"ms-toolsai.jupyter-renderers",
-				"VisualStudioExptTeam.vscodeintellicode"
+				"VisualStudioExptTeam.vscodeintellicode",
+				"ms-toolsai.jupyter"
 			]
 		}
 	},

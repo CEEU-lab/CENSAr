@@ -1,86 +1,42 @@
+from typing import Any
+
+import pandas as pd
 import geopandas as gpd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
-
-def choropleth(
-    gdf: gpd.GeoDataFrame,
-    column: str,
-    cmap: str = "viridis",
-) -> go.Figure:
-    fig = px.choropleth(
-        gdf,
-        geojson=gdf.geometry,
-        locations=gdf.index,
-        color=column,
-        color_continuous_scale=cmap,
-    )
-    fig.update_geos(fitbounds="geojson", visible=True)
-    # fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-    return fig
+import matplotlib.pyplot as plt
 
 
 def compare_chropleths(
     *gdfs: gpd.GeoDataFrame,
-    column: str,
-    nrows: int = 1,
-    ncols: int = 1,
-    titles: list[str] = [],
-    cmap: str = "viridis",
-) -> go.Figure:
-    if nrows * ncols == 1:
-        ncols = len(gdfs)
-    elif nrows * ncols < len(gdfs):
-        raise ValueError("Not enough subplots for all the gdfs")
+    column: str | list[str] = [],
+    titles: list[str | None] | None = None,
+    figsize: tuple[int, int] = (12, 8),
+    legend_kwds: dict[str, Any] = {"shrink": 0.3},
+    **kwargs,
+):
+    nplots = len(gdfs)
+    fig, axes = plt.subplots(nrows=1, ncols=nplots, figsize=figsize)
 
-    titles = titles or [f"Map {i}" for i in range(len(gdfs))]
+    # convert to list when only one column is needed
+    if isinstance(column, str):
+        column = [column for _ in range(nplots)]
+    assert len(column) == nplots, "one column for every dataset must be definided."
 
-    fig = make_subplots(
-        rows=nrows,
-        cols=ncols,
-        specs=[[{"type": "choropleth"} for c in range(ncols)] for r in range(nrows)],
-        subplot_titles=titles,
-    )
-    for i, gdf in enumerate(gdfs):
-        fig.add_trace(
-            choropleth(gdf, column, cmap).data[0],
-            row=i // ncols + 1,
-            col=i % ncols + 1,
-        )
+    titles = titles or [None for _ in range(nplots)]
+    assert len(titles) == nplots, "one title for every dataset must be definided."
 
-    fig.update_geos(fitbounds="geojson", visible=True)
-    return fig
+    kwargs["legend"] = kwargs.get("legend", True)
+    kwargs["legend_kwds"] = legend_kwds
+    print(kwargs)
 
+    for gdf, ax, column in zip(gdfs, axes, column):
+        gdf.plot(ax=ax, column=column, **kwargs)
 
-def compare_columns_chropleths(
-    gdf: gpd.GeoDataFrame,
-    columns: list[str],
-    nrows: int = 1,
-    ncols: int = 1,
-    cmap: str = "viridis",
-) -> go.Figure:
-    if nrows * ncols == 1:
-        ncols = len(columns)
-    elif nrows * ncols < len(columns):
-        raise ValueError("Not enough subplots for all columns")
+    for ax in axes:
+        ax.set_axis_off()
 
-    titles = columns
+    for ax, title in zip(axes, titles):
+        ax.set_title(title)
 
-    fig = make_subplots(
-        rows=nrows,
-        cols=ncols,
-        specs=[[{"type": "choropleth"} for c in range(ncols)] for r in range(nrows)],
-        subplot_titles=titles,
-    )
-    for i, column in enumerate(columns):
-        fig.add_trace(
-            choropleth(gdf, column, cmap).data[0],
-            row=i // ncols + 1,
-            col=i % ncols + 1,
-        )
-    # for i, data in enumerate(fig["data"]):
-    #     fig.update_traces(marker_color=data["marker"]["line"]["color"])
-
-    fig.update_geos(fitbounds="geojson", visible=True)
+    plt.tight_layout()
+    plt.close()
     return fig

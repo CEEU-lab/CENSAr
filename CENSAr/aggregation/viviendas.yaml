@@ -1,0 +1,50 @@
+Tipo vivienda particular:
+  mapping:
+    - name: Formal
+      columns:
+        - Casa
+        - Departamento
+        - Pieza Inquilinato
+        - Hotel pension
+        - Vivienda movil
+    - name: Informal
+      columns:
+        - Rancho
+        - Casilla
+        - Local no construido para habitacion
+    - name: Situacion de calle
+      columns:
+        - Persona viviendo en la calle
+
+Vulnerabilidad Urbana:
+  mapping:
+    - name: Vulnerable
+      columns:
+        - Informal
+        - Situacion de calle
+    - name: No vulnerable
+      columns:
+        - Formal
+
+Calidad de conexiones a servicios:
+  mapping:
+    - name: Insatisfactoria
+      columns:
+        - Insuficiente
+    - name: Satisfactoria
+      columns:
+        - Satisfactoria
+        - Básica
+
+Calidad de los materiales:
+  mapping:
+    - name: Aceptable
+      columns:
+        - Calidad 1
+    - name: Recuperable
+      columns:
+        - Calidad 2
+    - name: Irrecuperable
+      columns:
+        - Calidad 3
+        - Calidad 4

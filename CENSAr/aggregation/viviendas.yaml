@@ -1,50 +1,52 @@
-Tipo vivienda particular:
+tipo vivienda particular:
   mapping:
-    - name: Formal
+    - name: formal
       columns:
-        - Casa
-        - Departamento
-        - Pieza Inquilinato
-        - Hotel pension
-        - Vivienda movil
-    - name: Informal
+        - departamento
+        - pieza en inquilinato
+        - pieza en hotel o pension
+        - vivienda movil
+      regex:
+        - "casa *"
+    - name: informal
       columns:
-        - Rancho
-        - Casilla
-        - Local no construido para habitacion
-    - name: Situacion de calle
+        - rancho
+        - casilla
+        - local no construido para habitacion
+    - name: situacion de calle
       columns:
-        - Persona viviendo en la calle
+        - persona viviendo en la calle
+        - en la calle
 
-Vulnerabilidad Urbana:
+vulnerabilidad urbana:
   mapping:
-    - name: Vulnerable
+    - name: vulnerable
       columns:
-        - Informal
-        - Situacion de calle
-    - name: No vulnerable
+        - informal
+        - situacion de calle
+    - name: no vulnerable
       columns:
-        - Formal
+        - formal
 
-Calidad de conexiones a servicios:
+calidad de conexiones a servicios:
   mapping:
-    - name: Insatisfactoria
+    - name: insatisfactoria
       columns:
-        - Insuficiente
-    - name: Satisfactoria
+        - insuficiente
+    - name: satisfactoria
       columns:
-        - Satisfactoria
-        - Básica
+        - satisfactoria
+        - básica
 
-Calidad de los materiales:
+calidad de los materiales:
   mapping:
-    - name: Aceptable
+    - name: aceptable
       columns:
-        - Calidad 1
-    - name: Recuperable
+        - calidad 1
+    - name: recuperable
       columns:
-        - Calidad 2
-    - name: Irrecuperable
+        - calidad 2
+    - name: irrecuperable
       columns:
-        - Calidad 3
-        - Calidad 4
+        - calidad 3
+        - calidad 4

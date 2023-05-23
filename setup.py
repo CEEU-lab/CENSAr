@@ -29,5 +29,6 @@ setup(
         "pydantic==1.10.7",
         "geopandas==0.13.0",
         "srsly==2.4.6",
+        "more_itertools==9.1.0"
     ],
 )

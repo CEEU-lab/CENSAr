@@ -26,37 +26,29 @@ def text_normalize(text: str) -> str:
     return text
 
 
-@st.cache_data
 def caba_neighborhood_limits(root=CARTO_DIR):
     logger.info("retriving CABA neighborhood")
-    path = f"{root}caba_barrios.zip"
-    gdf = gpd.read_file(path)
-    return gdf
+    path = f"{root}/caba_barrios.zip"
+    return gpd.read_file(path)
 
 
-@st.cache_data
 def caba_comunas_limits(root=CARTO_DIR):
-    path = f"{root}caba_comunas.zip"
-    gdf = gpd.read_file(path)
-    return gdf
+    path = f"{root}/caba_comunas.zip"
+    return gpd.read_file(path)
 
 
-@st.cache_data
 def radios_gba24_2010(root=CARTO_DIR):
-    path = f"{root}radios_2010_gba24.zip"
-    radios = gpd.read_file(path)
-    return radios
+    path = f"{root}/radios_2010_gba24.zip"
+    return gpd.read_file(path)
 
 
-@st.cache_data
 def radios_caba_2010(root=CARTO_DIR):
-    path = f"{root}radios_2010_caba.zip"
-    radios = gpd.read_file(path)
-    return radios
+    path = f"{root}/radios_2010_caba.zip"
+    return gpd.read_file(path)
 
 
 def radios_prov(year, prov, root=CARTO_DIR, mask=None):
-    path = f"{root}radios_{year}_{prov}.zip"
+    path = f"{root}/radios_{year}_{prov}.zip"
     radios = gpd.read_file(path)
 
     if mask is not None:
@@ -72,7 +64,7 @@ def radios_precenso_2020(root=CARTO_DIR, geo_filter=None, mask=None):
     geo_filter (dict): nomprov + nomdepto (e.g. {'prov':'18', 'depto':'021'})
     mask (Polygon): shapely's polygon geometry
     """
-    path = f"{root}radios_precenso_2020.zip"
+    path = f"{root}/radios_precenso_2020.zip"
     radios = gpd.read_file(path)
 
     # 1. Filtra radios dentro del departamento
@@ -112,12 +104,11 @@ def radios_eph_censo_2010(aglo_idx, root=CARTO_DIR):
     mask = gpd.read_file(path)
     mask_wgs = mask[mask["eph_codagl"].isin([aglo_idx])].copy().to_crs(4326)
     mask_wgs["cons"] = 0
-    envolvente = mask_wgs.dissolve(by="cons")
-    return envolvente
+    return mask_wgs.dissolve(by="cons")
 
 
 def tipoviv_radios_prov(year, prov, var_types, root=DATA_DIR):
-    path = f"{root}tipo_vivienda_radios_{prov}_{year}.csv"
+    path = f"{root}/tipo_vivienda_radios_{prov}_{year}.csv"
     logger.info(f"loading `{path}`")
     tipoviv_radio = pd.read_csv(path, dtype=var_types)
     tipoviv_radio.columns = [text_normalize(c) for c in tipoviv_radio.columns]
@@ -125,21 +116,21 @@ def tipoviv_radios_prov(year, prov, var_types, root=DATA_DIR):
 
 
 def regtenviv_radios_prov(year, prov, var_types, root=DATA_DIR):
-    path = f"{root}reg_tenencia_viv_radios_{prov}_{year}.csv"
+    path = f"{root}/reg_tenencia_viv_radios_{prov}_{year}.csv"
     regtenviv_radio = pd.read_csv(path, dtype=var_types)
     regtenviv_radio.columns = [text_normalize(c) for c in regtenviv_radio.columns]
     return regtenviv_radio
 
 
 def desagueinod_radios_prov(year, prov, var_types, root=DATA_DIR):
-    path = f"{root}desagueinod_radios_{prov}_{year}.csv"
+    path = f"{root}/desagueinod_radios_{prov}_{year}.csv"
     desagueinod_radio = pd.read_csv(path, dtype=var_types)
     desagueinod_radio.columns = [text_normalize(c) for c in desagueinod_radio.columns]
     return desagueinod_radio
 
 
 def personas_radios_prov(year, prov, var_types, root=DATA_DIR):
-    path = f"{root}personas_radios_{prov}_{year}.csv"
+    path = f"{root}/personas_radios_{prov}_{year}.csv"
     logger.info(f"loading `{path}`")
     personas_radio = pd.read_csv(path, dtype=var_types)
     personas_radio.columns = [text_normalize(c) for c in personas_radio.columns]
@@ -147,24 +138,20 @@ def personas_radios_prov(year, prov, var_types, root=DATA_DIR):
 
 
 def servurban_radios_prov(prov, var_types, root=DATA_DIR):
-    path = f"{root}servurbanos_radios_{prov}_2001.csv"
+    path = f"{root}/servurbanos_radios_{prov}_2001.csv"
     servurban_radio = pd.read_csv(path, dtype=var_types)
     servurban_radio.columns = [text_normalize(c) for c in servurban_radio.columns]
     return servurban_radio
 
 
-@st.cache_data
 def inmat_radios_gba24_2010(root=DATA_DIR):
-    path = f"{root}inmat_gba24.csv"
-    inmat_por_radio = pd.read_csv(path)
-    return inmat_por_radio
+    path = f"{root}/inmat_gba24.csv"
+    return pd.read_csv(path)
 
 
-@st.cache_data
 def inmat_radios_caba_2010(root=DATA_DIR):
-    path = f"{root}inmat_caba.csv"
-    inmat_por_radio = pd.read_csv(path)
-    return inmat_por_radio
+    path = f"{root}/inmat_caba.csv"
+    return pd.read_csv(path)
 
 
 def tracts_matching_0110(prov, var_types, root=DATA_DIR):
@@ -172,13 +159,11 @@ def tracts_matching_0110(prov, var_types, root=DATA_DIR):
     path = os.path.join(root, filename)
     logger.info(f"loadding `{path}`")
 
-    conversion_radios = pd.read_csv(path, dtype=var_types)
-    return conversion_radios
+    return pd.read_csv(path, dtype=var_types)
 
 
 def persproy_depto_2025(prov, root=DATA_DIR):
     filename = f"persproyect_depto_{prov}.csv"
     path = os.path.join(root, filename)
     logger.info(f"loading, `{path}`")
-    proyecciones_pobl = pd.read_csv(path, index_col="Departamento")
-    return proyecciones_pobl
+    return pd.read_csv(path, index_col="Departamento")

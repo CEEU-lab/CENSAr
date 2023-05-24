@@ -10,5 +10,7 @@ geopandas
 folium
 mapclassify
 rtree
+srsly
+pydantic
 
 -e ../

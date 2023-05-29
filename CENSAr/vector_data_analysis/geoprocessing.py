@@ -26,8 +26,7 @@ def from_wkt(df, wkt_column, crs=4326):
 
 def from_coarser_to_thiner_area(coarser_geom, thiner_geom,coarser_idx, thiner_idx):
     """
-    Returns the total number of households or residential units for a given
-    category with his distribution by census tract.
+    Returns the overlay area between coarser and thiner geometries.
 
     Parameters
     ----------
@@ -59,3 +58,37 @@ def from_coarser_to_thiner_area(coarser_geom, thiner_geom,coarser_idx, thiner_id
     proportions['coarser_share'] = proportions['coarser_share'].round(1)
     
     return proportions
+
+def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom, 
+                                     coarser_idx, thiner_idx, crs):
+    """
+    Estimates the percentage of a coarser area intersected by a thiner geometry.
+
+    Parameters
+    ----------
+    coarser_geom : gpd.GeoDataFrame
+        Geodataframe with coarser area Polygon geometries.
+    thiner_geom : gpd.GeoDataFrame
+        Geodataframe with thiner area Polygon geometries contained in coarser ones.
+    coarser_idx : str 
+        Name of the index column to identify each Polygon geometry (e.g.:"link"))
+    thiner_idx : str 
+        Name of the index column to identify each Polygon geometry (e.g.:"renabap_id"))
+
+    Returns
+    -------
+    proportions:pd.Series
+        Column with coarser geom indexes and the percentage of the thiner overlay.
+    """
+    # Reproject in 2D to estimate areas correctly
+    coarser_gdf_rep = coarser_geom.to_crs(crs)
+    thiner_gdf_rep = thiner_geom.to_crs(crs) 
+
+    coarser_overlay = from_coarser_to_thiner_area(coarser_geom=coarser_gdf_rep, 
+                                                 thiner_geom=thiner_gdf_rep,
+                                                 coarser_idx=coarser_idx, 
+                                                 thiner_idx=thiner_idx)
+    
+    thiner_overlay_share = coarser_overlay.groupby(coarser_idx)['coarser_share'].sum()
+    coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_share)
+    return coarser_gdf_rep['thiner_ovl_pct']

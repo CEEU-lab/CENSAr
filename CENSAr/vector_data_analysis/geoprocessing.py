@@ -77,8 +77,8 @@ def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom,
 
     Returns
     -------
-    proportions:pd.Series
-        Column with coarser geom indexes and the percentage of the thiner overlay.
+    coarser_area_shraes:dict
+        Coarser area geometries and percentage of the thiner overlay.
     """
     # Reproject in 2D to estimate areas correctly
     coarser_gdf_rep = coarser_geom.to_crs(crs)
@@ -91,4 +91,5 @@ def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom,
     
     thiner_overlay_share = coarser_overlay.groupby(coarser_idx)['coarser_share'].sum()
     coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_share)
-    return coarser_gdf_rep['thiner_ovl_pct']
+    coarser_area_shraes = dict(zip(coarser_gdf_rep['coarser_idx'], coarser_gdf_rep['thiner_ovl_pct']))
+    return coarser_area_shraes

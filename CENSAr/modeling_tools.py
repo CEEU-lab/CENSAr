@@ -24,8 +24,7 @@ def totals_forecast(
     proyections_df,
     namedept,
     base_year,
-    forecast_year,
-):
+    forecast_year):
     """
     Returns the projected number of households or residential units
     based on Statistics National Institute (INDEC) total persons
@@ -164,8 +163,8 @@ def observed_dist(catname, idx_col, base_year, gdf_base, gdf_forecast):
 
 
 def var_forecast(
-    gdf_2001, gdf_2010, catname, gdf_2020, pct_target, base_year, tot_colname
-):
+    gdf_2001, gdf_2010, catname, gdf_2020, pct_target, base_year, 
+    tot_colname, calibration_vector={'weights':None, 'mix_dist':False}):
     """
     Returns the total number of households or residential units for a given
     category with his distribution by census tract.
@@ -191,6 +190,8 @@ def var_forecast(
     tot_colname : str
         name of the total variables column in the census geodataframe where
         the category is being simulated.
+    calibration_vector : dict, default "{'weights':None, 'mix_dist':False}"
+        Percentage of tract geometries intersected by other polygons.
 
     Returns
     -------
@@ -249,6 +250,21 @@ def var_forecast(
             (gdf_2020["var_2001"] + gdf_2020["var_2010"]) / 2, 4
         )  # middle beetwen 01 and 10
         dist_var = gdf_2020[f"var_0110"]
+
+    if calibration_vector['weights']:
+        # returns the % of the tract area covered by other polygons 
+        gdf_2020['pct_calibration_surface'] = gdf_2020[idx_col].map(calibration_vector['weights'])
+
+        # distribution based on the spatial relation with calibration 
+        #calibration_dist_var =  gdf_2020['pct_calibration_surface'].fillna(0)/gdf_2020['pct_calibration_surface'].sum() 
+        calibration_dist_var =  gdf_2020['pct_calibration_surface'].fillna(0)
+        # mix observed 2001 & 2010 distributions with intersected calibration polygons
+        if calibration_vector['mix_dist']:
+            dist_var_ = round((dist_var + calibration_dist_var)/2, 4)
+            dist_var__ = dist_var_/dist_var_.sum()
+            dist_var__ = dist_var_
+            # overwrites the dist_var
+            dist_var = dist_var__.copy() 
 
     totcat = int(
         gdf_2020[tot_colname].sum() * pct_target / 100
@@ -334,7 +350,7 @@ def simulate_cat_var(
     pct_val,
     catname,
     tot_colname,
-):
+    calibration_vector={'weights':None, 'mix_dist':False}):
     """
     Distributes the estimated number of households or residential units by tract
     following the same distribution in the most recent census information.
@@ -362,6 +378,8 @@ def simulate_cat_var(
     tot_colname : str
         name of the total variables column in the census geodataframe where
         the category is being simulated.
+    calibration_vector : dict, default "{'weights':None, 'mix_dist':False}"
+        Percentage of tract geometries intersected by other polygons.
 
     Returns
     -------
@@ -377,6 +395,7 @@ def simulate_cat_var(
         pct_target=pct_val,
         base_year=base_year,
         tot_colname=tot_colname,
+        calibration_vector = calibration_vector
     )
 
     sim_dist = distribute_totals_tract(

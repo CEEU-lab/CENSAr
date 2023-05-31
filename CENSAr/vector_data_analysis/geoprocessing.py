@@ -85,11 +85,11 @@ def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom,
     thiner_gdf_rep = thiner_geom.to_crs(crs) 
 
     coarser_overlay = from_coarser_to_thiner_area(coarser_geom=coarser_gdf_rep, 
-                                                 thiner_geom=thiner_gdf_rep,
-                                                 coarser_idx=coarser_idx, 
-                                                 thiner_idx=thiner_idx)
+                                                  thiner_geom=thiner_gdf_rep,
+                                                  coarser_idx=coarser_idx, 
+                                                  thiner_idx=thiner_idx)
     
     thiner_overlay_share = coarser_overlay.groupby(coarser_idx)['coarser_share'].sum()
-    coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_share)
-    coarser_area_shraes = dict(zip(coarser_gdf_rep['coarser_idx'], coarser_gdf_rep['thiner_ovl_pct']))
+    coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_share).fillna(0)
+    coarser_area_shraes = dict(zip(coarser_gdf_rep[coarser_idx], coarser_gdf_rep['thiner_ovl_pct']))
     return coarser_area_shraes

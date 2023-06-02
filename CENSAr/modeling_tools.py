@@ -248,23 +248,22 @@ def var_forecast(
 
         gdf_2020["var_0110"] = round(
             (gdf_2020["var_2001"] + gdf_2020["var_2010"]) / 2, 4
-        )  # middle beetwen 01 and 10
+        )  # middle beetwen 01 and 10 
         dist_var = gdf_2020[f"var_0110"]
 
-    if calibration_vector['weights']:
-        # returns the % of the tract area covered by other polygons 
-        gdf_2020['pct_calibration_surface'] = gdf_2020[idx_col].map(calibration_vector['weights'])
+    if calibration_vector['weights']: 
+        gdf_2020['calibration_weights'] = gdf_2020[idx_col].map(calibration_vector['weights'])
 
         # distribution based on the spatial relation with calibration 
-        #calibration_dist_var =  gdf_2020['pct_calibration_surface'].fillna(0)/gdf_2020['pct_calibration_surface'].sum() 
-        calibration_dist_var =  gdf_2020['pct_calibration_surface'].fillna(0)
+        calibration_dist_var =  gdf_2020['calibration_weights'].fillna(1)/gdf_2020['calibration_weights'].sum() 
+        
         # mix observed 2001 & 2010 distributions with intersected calibration polygons
         if calibration_vector['mix_dist']:
             dist_var_ = round((dist_var + calibration_dist_var)/2, 4)
-            dist_var__ = dist_var_/dist_var_.sum()
-            dist_var__ = dist_var_
-            # overwrites the dist_var
-            dist_var = dist_var__.copy() 
+            dist_var = dist_var_.copy() 
+        else:
+            # use calibration vector only
+            dist_var = calibration_dist_var.copy()
 
     totcat = int(
         gdf_2020[tot_colname].sum() * pct_target / 100

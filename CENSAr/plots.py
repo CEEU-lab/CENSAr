@@ -69,7 +69,7 @@ def compare_chropleths(
 def plot_grouped_bars(
     df: pd.DataFrame, 
     figsize: tuple[int, int], 
-    chart_title: str, 
+    chart_title: str | None, 
     len_groups: int, 
     bar_width: float, 
     colors: dict, 
@@ -80,100 +80,169 @@ def plot_grouped_bars(
     ylim: int | None,
     xaxis_formatter: str | None, 
     xticks_rotation: int):
-  """
-  """
-  labels = [c for c in df.columns.values]
-  cat_groups = [i for i in df.index.values]
-  val_arrays = {}
+    """
+    Plots grouped bar charts.
 
-  for g in cat_groups:
-      val_arrays[g] = df.loc[g].values[:len(labels)]
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with bar values by group.
+    figsize : tuple
+        Figure size.
+    chart_title : str | None
+        Choropletic maps titles
+    len_groups : int
+        Number of bar groups.
+    bar_width : float
+        Bar width.
+    colors : dict
+        Name of the dataframe columns and color codes (e.g. {colname:color})
+    fcolor : str
+        Bar annotations background color
+    tcolor : str
+        Bar annotations text color
+    yaxis_name : str
+        yaxis title
+    yaxis_formatter : str | None
+        y axis values style formatting (e.g. '{}%')
+    ylim : int
+        y axis limit
+    xaxis_formatter : str | None
+        x axis values style formatting (e.g. '{}$')
+    xtick_rotation : int
+        xticks text rotation
+    
+    Returns
+    -------
+    fig:matplotlib.figure.Figure
+        Grouped bars chart
+    """
+    labels = [c for c in df.columns.values]
+    cat_groups = [i for i in df.index.values]
+    val_arrays = {}
 
-  first_group = list(val_arrays.keys())[0]
-  dis = np.arange(len(val_arrays[first_group]))
+    for g in cat_groups:
+        val_arrays[g] = df.loc[g].values[:len(labels)]
 
-  fig, ax = plt.subplots(figsize=figsize)
+    first_group = list(val_arrays.keys())[0]
+    dis = np.arange(len(val_arrays[first_group]))
 
-  for k,v in val_arrays.items():
-      if k!= first_group:
-          dis = [x + bar_width for x in dis]
-      ax.bar(dis,height=val_arrays[k], width=bar_width, label=k, 
-             align='center', color=colors[k])
+    fig, ax = plt.subplots(figsize=figsize)
 
-      annot_props = dict(boxstyle='round', facecolor=fcolor, alpha=1)
-      for horizontal, vertical in zip(dis, val_arrays[k]):
-        ax.text(horizontal,
-                vertical/len_groups, 
-                str(vertical), 
-                fontsize=10,
-                color=tcolor, 
-                bbox=annot_props, ha='center')
-        
-  ax.spines['top'].set_visible(False)
-  ax.spines['bottom'].set_visible(False)
-  ax.spines['right'].set_visible(False)
-  ax.set_ylabel(yaxis_name)
+    for k,v in val_arrays.items():
+        if k!= first_group:
+            dis = [x + bar_width for x in dis]
+        ax.bar(dis,height=val_arrays[k], width=bar_width, label=k, 
+                align='center', color=colors[k])
 
-  plt.suptitle(chart_title, fontsize=15)
-  ax.set_ylim(ylim)
-  ax.legend()
+        annot_props = dict(boxstyle='round', facecolor=fcolor, alpha=1)
+        for horizontal, vertical in zip(dis, val_arrays[k]):
+            ax.text(horizontal,
+                    vertical/len_groups, 
+                    str(vertical), 
+                    fontsize=10,
+                    color=tcolor, 
+                    bbox=annot_props, ha='center')
+            
+    ax.spines['top'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_ylabel(yaxis_name)
 
-  xpos = [pos + bar_width for pos in range(len_groups)]  
-  plt.xticks(xpos, labels, rotation=xticks_rotation)
-  plt.grid(color='lightgrey',  linewidth=0.5, alpha=0.3)
+    plt.suptitle(chart_title, fontsize=15)
+    ax.set_ylim(ylim)
+    ax.legend()
 
-  if yaxis_formatter:
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda y, _: yaxis_formatter.format(int(y))))
+    xpos = [pos + bar_width for pos in range(len_groups)]  
+    plt.xticks(xpos, labels, rotation=xticks_rotation)
+    plt.grid(color='lightgrey',  linewidth=0.5, alpha=0.3)
 
-  if xaxis_formatter:
-    plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, _: xaxis_formatter.format(int(x))))
+    if yaxis_formatter:
+        plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda y, _: yaxis_formatter.format(int(y))))
 
+    if xaxis_formatter:
+        plt.gca().xaxis.set_major_formatter(FuncFormatter(lambda x, _: xaxis_formatter.format(int(x))))
+
+    plt.tight_layout()
+    plt.close()
+
+    return fig
 
 def plot_dist_continvar(
-      serie: pd.Series, 
-      tit: str | None, 
-      figsize: tuple[int, int], 
-      bval: int, 
-      lim: int, 
-      xlabel: str, 
-      ylabel: str, 
-      fill_hist: bool):
-  """
-  """
-  fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, nrows=1, figsize=figsize)
+    serie: pd.Series, 
+    tit: str | None, 
+    figsize: tuple[int, int], 
+    bval: int, 
+    lim: int, 
+    xlabel: str, 
+    ylabel: str, 
+    fill_hist: bool):
+    """
+    Plots distributions for continuous variables.
 
-  boxprops = dict(color="#000000",linewidth=1.25)
-  medianprops = dict(color="#fed547",linewidth=1.5)
-  ax1.boxplot(serie, showfliers=False, boxprops=boxprops, medianprops=medianprops)
-  ax2.hist(serie, bins=bval, density=False, histtype='step', color='#07cdd8',fill=fill_hist)
-  serie.plot(kind='kde', ax=ax3, color='#07cdd8', legend=None)
+    Parameters
+    ----------
+    serie : pd.Series
+        Continuous values serie.
+    tit : str | None
+        Chart title.
+    figsize : tuple
+        Figure size.
+    bval : int
+        Bins size.
+    lim : int
+        xaxis limit
+    xlabel : str
+        xaxis title
+    ylabel : str
+        yaxis title
+    fill_hist : bool
+        Wether to fill histogram or not
 
-  plt.suptitle(tit, fontsize=20)
-  ax1.set_title('')
-  ax2.set_title('')
-  ax3.set_title('')
+    Returns
+    -------
+    fig:matplotlib.figure.Figure
+        Distribution charts
+    """
+    fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, nrows=1, figsize=figsize)
 
-  ax1.set_xlabel(xlabel)
-  ax1.set_ylabel(ylabel)
+    boxprops = dict(color="#000000",linewidth=1.25)
+    medianprops = dict(color="#fed547",linewidth=1.5)
+    ax1.boxplot(serie, showfliers=False, boxprops=boxprops, medianprops=medianprops)
+    ax2.hist(serie, bins=bval, density=False, histtype='step', color='#07cdd8',fill=fill_hist)
+    serie.plot(kind='kde', ax=ax3, color='#07cdd8', legend=None)
 
-  ax2.set_xlabel(ylabel)
-  ax2.set_ylabel(xlabel) 
-  ax2.xaxis.set_label_coords(1.05, -.12)
+    plt.suptitle(tit, fontsize=20)
+    ax1.set_title('')
+    ax2.set_title('')
+    ax3.set_title('')
 
-  ax1.set_xticks([])
-  ax3.set_yticks([]) 
-  ax3.set_ylabel('')
+    ax1.set_xlabel(xlabel)
+    ax1.set_ylabel(ylabel)
 
-  for ax in [ax1,ax2,ax3]:
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
+    ax2.set_xlabel(ylabel)
+    ax2.set_ylabel(xlabel) 
+    ax2.xaxis.set_label_coords(1.05, -.12)
 
-  ax3.spines['left'].set_visible(False)
+    ax1.set_xticks([])
+    ax3.set_yticks([]) 
+    ax3.set_ylabel('')
 
-  # medidas de tendencia central 
-  for ax in [ax2, ax3]:
-    ax.grid(axis='x')
-    ax.axvline(serie.describe()['mean'], color='#4e2c76', linewidth=1)
-    ax.axvline(serie.describe()['50%'], color='#fed547', linewidth=1)
-    ax.set_xlim(0,lim);
+    for ax in [ax1,ax2,ax3]:
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+
+    ax3.spines['left'].set_visible(False)
+
+    # medidas de tendencia central 
+    for ax in [ax2, ax3]:
+        ax.grid(axis='x')
+        ax.axvline(serie.describe()['mean'], color='#4e2c76', linewidth=1)
+        ax.axvline(serie.describe()['50%'], color='#fed547', linewidth=1)
+        ax.set_xlim(0,lim)
+    
+    plt.tight_layout()
+    plt.close()
+
+    return fig

@@ -11,7 +11,9 @@ def compare_chropleths(
     *gdfs: gpd.GeoDataFrame,
     column: str | list[str] = [],
     titles: list[str | None] | None = None,
+    urban_boundaries: None | list[gpd.GeoDataFrame],
     figsize: tuple[int, int] = (12, 8),
+    SRID: int | str = 4326, 
     legend_kwds: dict[str, Any] = {"shrink": 0.3},
     **kwargs):
     """
@@ -25,8 +27,13 @@ def compare_chropleths(
         Name/s of the column/s of each geodataframe.
     titles : list of str or None
         Choropletic maps titles
+    urban_boundaries : None | list of gdf
+        List of overlaying Polygon bounadries. The list
+        must match with the number of dataframes in *gdfs
     figsize : tuple
         Figure size.
+    SRID : int | str, default EPSG 4326
+        Coordinates reference system.
     legend_kwds : dict, default {"shrink": 0.3}
         Legend settings.
     **kwargs: Aditional plotting config.
@@ -54,7 +61,13 @@ def compare_chropleths(
     print(kwargs)
 
     for gdf, ax, column in zip(gdfs, axes, column):
-        gdf.plot(ax=ax, column=column, **kwargs)
+        gdf.to_crs(SRID).plot(ax=ax, column=column, **kwargs)
+
+    if urban_boundaries:
+        idx = 0
+        for gdf in urban_boundaries:
+            gdf.to_crs(SRID).geometry.boundary.plot(ax=axes[idx], linewidth=0.1, color='red')
+            idx += 1
 
     for ax in axes:
         ax.set_axis_off()

@@ -60,7 +60,8 @@ def from_coarser_to_thiner_area(coarser_geom, thiner_geom,coarser_idx, thiner_id
     return proportions
 
 def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom, 
-                                     coarser_idx, thiner_idx, crs):
+                                     coarser_idx, thiner_idx, crs,
+                                     coarser_tot=True):
     """
     Estimates the percentage of a coarser area intersected by a thiner geometry.
 
@@ -74,6 +75,10 @@ def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom,
         Name of the index column to identify each Polygon geometry (e.g.:"link"))
     thiner_idx : str 
         Name of the index column to identify each Polygon geometry (e.g.:"renabap_id"))
+    coarser_tot : bool, default True 
+        If True, the output corresponds to the percentage of the coarser polygon
+        covered by the area of the thiner one. If not, then the total area of the clipped
+        polygon is returned
 
     Returns
     -------
@@ -89,7 +94,19 @@ def build_thiner_pct_in_coarser_geom(coarser_geom, thiner_geom,
                                                   coarser_idx=coarser_idx, 
                                                   thiner_idx=thiner_idx)
     
-    thiner_overlay_share = coarser_overlay.groupby(coarser_idx)['coarser_share'].sum()
-    coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_share).fillna(0)
-    coarser_area_shraes = dict(zip(coarser_gdf_rep[coarser_idx], coarser_gdf_rep['thiner_ovl_pct']))
-    return coarser_area_shraes
+    if coarser_tot:
+
+        thiner_overlay_share = coarser_overlay.groupby(coarser_idx)['coarser_share'].sum()
+        coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_share).fillna(0)
+        coarser_area_thiner_shares = dict(zip(coarser_gdf_rep[coarser_idx], coarser_gdf_rep['thiner_ovl_pct']))
+
+        return coarser_area_thiner_shares
+    
+    else:
+        thiner_overlay_area = coarser_overlay.groupby(coarser_idx)['ovl_area'].sum()
+        coarser_gdf_rep['thiner_ovl_areasum'] = coarser_gdf_rep[coarser_idx].map(thiner_overlay_area).fillna(0)
+        total_intersection_areas = coarser_overlay.groupby(thiner_idx)['thiner_area'].last().sum()
+        coarser_gdf_rep['thiner_ovl_pct'] = coarser_gdf_rep['thiner_ovl_areasum']/total_intersection_areas
+        coarser_area_thiner_shares = dict(zip(coarser_gdf_rep[coarser_idx], coarser_gdf_rep['thiner_ovl_pct']))
+
+        return coarser_area_thiner_shares

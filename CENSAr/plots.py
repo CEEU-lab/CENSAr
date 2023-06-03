@@ -66,7 +66,7 @@ def compare_chropleths(
     if urban_boundaries:
         idx = 0
         for gdf in urban_boundaries:
-            gdf.to_crs(SRID).geometry.boundary.plot(ax=axes[idx], linewidth=0.1, color='red')
+            gdf.to_crs(SRID).geometry.boundary.plot(ax=axes[idx], linewidth=0.1, color='black')
             idx += 1
 
     for ax in axes:

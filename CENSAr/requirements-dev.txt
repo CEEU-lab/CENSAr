@@ -12,5 +12,7 @@ mapclassify
 rtree
 srsly
 pydantic
-
+rasterio
+scikit-image
+scikit-learn
 -e ../

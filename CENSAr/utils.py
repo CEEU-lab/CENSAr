@@ -14,6 +14,7 @@ def plot_folium_dual_choroplet(
     indicador_superior,
     nombre_superior,
     nombre_region,
+    idx_col_inferior='str_link'
 ):
     centroide = gdf_inferior.geometry.centroid
     coordenadas = [centroide.y.mean(), centroide.x.mean()]
@@ -46,8 +47,8 @@ def plot_folium_dual_choroplet(
         name="Radios censales",
         geo_data=gdf_inferior,
         data=gdf_inferior[[c for c in gdf_inferior.columns if c != "geometry"]],
-        columns=["str_link", categoria],
-        key_on="properties.str_link",
+        columns=[idx_col_inferior, categoria],
+        key_on="properties.{}".format(idx_col_inferior),
         fill_color="YlOrRd",
         bins=bins,  # type: ignore
         fill_opacity=0.9,
@@ -61,7 +62,7 @@ def plot_folium_dual_choroplet(
 
     area_inf.geojson.add_child(
         folium.features.GeoJsonTooltip(
-            fields=["str_link", categoria],
+            fields=[idx_col_inferior, categoria],
             aliases=["Radio_id:", categoria.capitalize() + ":"],
         )
     )

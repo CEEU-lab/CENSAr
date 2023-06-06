@@ -46,7 +46,7 @@ class ContextoUrbano:
                 / (x["variable_area_superior"] - x["categoria_area_superior"])
             )
         )
-
+        
         # Concentración espacial de la categoría
         CEC = ((x.groupby([id_superior])[["CEC"]].sum() * 0.5).round(3)).reset_index()
 
@@ -428,7 +428,7 @@ def radios_inmat_2010(region_name, geog, vals):
     return inmat_region
 
 
-def indice_geografia_superior(territorio_df, nombre_area, nombre_region):
+def indice_geografia_superior(territorio_df, nombre_area, nombre_region, area_superior_gdf=None):
     """
     Construye un indice complejo (e.g.: calidad de los materiales de la vivienda)
     desde una geografia inferior a otra superior
@@ -458,6 +458,8 @@ def indice_geografia_superior(territorio_df, nombre_area, nombre_region):
 
     elif nombre_region == "Bs.As. G.B.A. Zona Sur":
         area_superior_gdf = gba_sur_dept_limits().to_crs(4326)
+        gdf = pd.merge(area_superior_gdf, territorio_df, on=nombre_area)
+    else:
         gdf = pd.merge(area_superior_gdf, territorio_df, on=nombre_area)
 
     return gdf

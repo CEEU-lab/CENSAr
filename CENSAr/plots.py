@@ -145,13 +145,14 @@ def plot_grouped_bars(
     for k,v in val_arrays.items():
         if k!= first_group:
             dis = [x + bar_width for x in dis]
+        
         ax.bar(dis,height=val_arrays[k], width=bar_width, label=k, 
                 align='center', color=colors[k])
 
         annot_props = dict(boxstyle='round', facecolor=fcolor, alpha=1)
         for horizontal, vertical in zip(dis, val_arrays[k]):
             ax.text(horizontal,
-                    vertical/len_groups, 
+                    vertical/2, 
                     str(vertical), 
                     fontsize=10,
                     color=tcolor, 
@@ -166,7 +167,11 @@ def plot_grouped_bars(
     ax.set_ylim(ylim)
     ax.legend()
 
-    xpos = [pos + bar_width for pos in range(len_groups)]  
+    if len(cat_groups)%2 == 0:
+        xpos = [pos + (bar_width/2) for pos in range(len_groups)]
+    else:
+        xpos = [pos + bar_width for pos in range(len_groups)]
+      
     plt.xticks(xpos, labels, rotation=xticks_rotation)
     plt.grid(color='lightgrey',  linewidth=0.5, alpha=0.3)
 

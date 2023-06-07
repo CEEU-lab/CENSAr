@@ -68,7 +68,7 @@ class ContextoUrbano:
                 figsize=(18, 6),
                 legend=False,
                 ax=ax,
-                title="Concentración espacial de la categoría: %s" % (categoria),
+                title="Disimilitud espacial de la categoría: %s" % (categoria),
                 color="#F5564E",
                 edgecolor="#FAB95B",
                 alpha=1,
@@ -114,7 +114,7 @@ class ContextoUrbano:
             )
 
             cec_cat.fig.suptitle(
-                "Concentración del atributo VS Porcentaje por area superior",
+                "Disimilitud espacial del atributo VS Porcentaje por area superior",
                 fontsize=15,
                 x=0.54,
                 y=1.02,
@@ -123,7 +123,7 @@ class ContextoUrbano:
                 "Porcentaje de %s por %s" % (categoria, id_superior), labelpad=20
             )
             plt.ylabel(
-                "Concentración espacial de la categoría: %s" % (categoria), labelpad=20
+                "Disimilitud espacial de la categoría: %s" % (categoria), labelpad=20
             )
             plt.grid(axis="y", c="grey", alpha=0.1)
             plt.grid(axis="x", c="grey", alpha=0.1)
@@ -166,7 +166,7 @@ class ContextoUrbano:
                 figsize=(18, 6),
                 legend=False,
                 ax=ax,
-                title="Concentración espacial de la categoría: %s" % (categoria),
+                title="Disimilitud espacial de la categoría: %s" % (categoria),
                 color="#F5564E",
                 edgecolor="#FAB95B",
                 alpha=1,
@@ -177,7 +177,7 @@ class ContextoUrbano:
                     go.Bar(
                         x=area_cec[id_superior],
                         y=area_cec["CEC_100"],
-                        hovertemplate="Indice de concentración espacial: %{y:.2f}% <extra></extra>",
+                        hovertemplate="Indice de disimilitud espacial: %{y:.2f}% <extra></extra>",
                         marker={
                             "color": "rgba(240, 240, 240, 1.0)",
                             "line": {"width": 0},
@@ -197,7 +197,7 @@ class ContextoUrbano:
                 autosize=True,
                 width=1000,
                 height=500,
-                title="Concentración espacial de la categoría '{}' por área superior".format(
+                title="Disimilitud espacial de la categoría '{}' por área superior".format(
                     categoria
                 ),
                 plot_bgcolor="white",
@@ -261,7 +261,7 @@ class ContextoUrbano:
             data = [dataPoints, lineOfBestFit]
 
             layout = go.Layout(
-                title="Concentración vs. Porcentaje de la categoría '{}' por area superior".format(
+                title="Disimilitud vs. Porcentaje de la categoría '{}' por area superior".format(
                     categoria
                 ),
                 xaxis=dict(title="Porcentaje de %s por %s" % (categoria, id_superior)),

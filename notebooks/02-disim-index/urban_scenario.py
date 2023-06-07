@@ -16,10 +16,11 @@ from CENSAr.modeling_tools import (
 from CENSAr.vector_data_analysis.geoprocessing import (from_wkt, build_thiner_pct_in_coarser_geom)
 from CENSAr.aggregation import named_aggregation
 
-def resistencia_stquo_scenario():
-    envolvente_resistencia_00 = gpd.read_file('../../CENSAr/data/ManchaUrbana_Resistencia_1999.geojson')
-    envolvente_resistencia_10 = gpd.read_file('../../CENSAr/data/ManchaUrbana_Resistencia_2010.geojson')
-    envolvente_resistencia_20 = gpd.read_file('../../CENSAr/data/ManchaUrbana_Resistencia_2022.geojson')
+def resistencia_stquo_scenario(path00, path10, path_20):
+    # rasterdata_analysis outputs_
+    envolvente_resistencia_00 = gpd.read_file(path00)
+    envolvente_resistencia_10 = gpd.read_file(path10)
+    envolvente_resistencia_20 = gpd.read_file(path_20)
 
     # se cargan las geometrías de las tres fotos censales
     chaco_2001 = radios_prov(year=2001, prov="chaco", mask=envolvente_resistencia_00)
@@ -112,6 +113,9 @@ def resistencia_stquo_scenario():
     scenario = {2001:tipo_vivienda_agg_2001, 
                 2010:tipo_vivienda_agg_2010, 
                 2020:tipo_vivienda_agg_2020,
+                'env01':envolvente_resistencia_00,
+                'env10':envolvente_resistencia_10,
+                'env20':envolvente_resistencia_20,
                 'agg':True,
                 'calibration':True,
                 'pct_val':3.5}

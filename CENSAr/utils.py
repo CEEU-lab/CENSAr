@@ -10,7 +10,26 @@ import mapclassify
 #import pandas as pd
 #import geopandas as gpd
 
-def get_choroplet_colors(map, drop_continuos_bar=True):
+def get_choroplet_colors(
+    map: folium.folium.Map, 
+    drop_continuos_bar: bool = True
+    ):
+    """
+    Gets the colormap in a choropleth map of a folium object type. 
+    If indicated, it also drops the default continuous bar legend.
+
+    Parameters
+    ----------
+    map : folium.Map
+        Folium canvas containing choropletic maps.
+    drop_continuos_bar: Bool
+        Whether to drop folium continuous scale or not 
+
+    Returns
+    -------
+    colors:list[float]
+        Color codes
+    """
     for map_key in map._children:
         if map_key.startswith('choropleth'):
             choro = map._children[map_key]
@@ -23,7 +42,7 @@ def get_choroplet_colors(map, drop_continuos_bar=True):
                         choro_count = choro_keys.count(True)
                         
                         if choro_count > 1:
-                            # if more than one choroplet, drop the legend from the last one only
+                            # if there is more than one choroplet, drop the legend from the last one only
                             choro_key = [k for k in map._children.keys()][-1]
 
                             # filters the colormap of that choroplet (the last index)
@@ -44,10 +63,49 @@ def get_choroplet_colors(map, drop_continuos_bar=True):
     colors = choro_color_map.__dict__['colors']
     return colors
 
-def legend_rgba_to_hex(rgba_color):
-    return matplotlib.colors.to_hex(rgba_color, keep_alpha=True)
+def legend_rgba_to_hex(
+    rgba_color : int|str
+    ):
+    """
+    Transforms a rgba color code into hex.
 
-def build_template(indicator_name, legend_classes, colors):
+    Parameters
+    ----------
+    rgba_color : int | str
+        Color code to be trsnaformed. 
+
+    Returns
+    -------
+    hex_code:str
+        Hexadecimal color code
+    """
+    hex_code = matplotlib.colors.to_hex(rgba_color, keep_alpha=True)
+    return hex_code
+
+def build_template(
+        indicator_name : str, 
+        legend_classes : list[str], 
+        colors : list[tuple[float,float,float,float]]):
+    """
+    Creates the str template of the new choroplet legend.
+
+    Parameters
+    ----------
+    indicator_name : str
+        Name of the variable to use as legend title.
+    legend_classes : list
+        Range of the variable continuous values 
+        e.g. ['[0.55, 0.55]', '(0.55, 0.56]', '(0.56, 0.58]', '(0.58, 0.62]']
+    colors : list
+        Color codes used for each range of values
+        e.g. [(0.8, 0.8, 0.8, 1.0), ...]
+
+    Returns
+    -------
+    template:str
+        str input for Template() class instantiation. This object will be 
+        added to the folium.map where the choroplet exists.
+    """
     section1 = '''
                 {% macro html(this, kwargs) %}
                 <!doctype html>
@@ -139,7 +197,23 @@ def build_template(indicator_name, legend_classes, colors):
     template = section1 + section2 + section3
     return template
 
-def legend_intervals_to_int(legend_classes):
+def legend_intervals_to_int(
+    legend_classes : list[str]
+    ):
+    """
+    Transforms the str representation of floats into integer.
+
+    Parameters
+    ----------
+    legend_classes : list
+        Range of the variable continuous values 
+        e.g. ['[0.55, 0.55]', '(0.55, 0.56]', '(0.56, 0.58]', '(0.58, 0.62]']. 
+
+    Returns
+    -------
+    list:int
+        Color codes
+    """
 
     intervals=[]
     for n in range(len(legend_classes)):
@@ -208,7 +282,7 @@ def plot_folium_dual_choroplet(
     bins_inf = [b for b in qcut.bins]
     bins_inf.insert(0, 0.00)
     legend_classes_inf = qcut.get_legend_classes()
-
+    
     area_inf = folium.Choropleth(
         name="Radios censales",
         geo_data=gdf_inferior,
@@ -268,9 +342,9 @@ def plot_folium_dual_choroplet(
         columns=[nombre_superior, indicador_superior],
         key_on="properties." + nombre_superior,
         fill_color="Greys",
-        bins=bins_sup,  # type: ignore
+        bins=bins_sup,  
         fill_opacity=0.6,
-        line_opacity=0.1,  # type: ignore
+        line_opacity=0.1,  
         highlight=True,
         legend_name="Disimilitud espacial: {}".format(
             categoria

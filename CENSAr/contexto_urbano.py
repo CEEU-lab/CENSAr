@@ -9,66 +9,80 @@ import plotly.graph_objects as go
 from CENSAr.utils import *
 from CENSAr.datasources import *
 
-##################################################
-# Distribución territorial de atributos censales #
-##################################################
+#################################################
+### Spatial distribution of census attributes ### 
+#################################################
 
 
-class ContextoUrbano:
+class UrbanFeatures:
     """
-    Describe un territorio a partir de la relación de atributos
-    entre áreas administrativas superiores e inferiores.
-    Parametros
-    ----------
-    area_superior (pandas dataframe): totales de la variable y la categoria a describir por unidad administrativa
-    area_inferior (pandas dataframe): totales de la variable y la categoria a describir por unidad administrativa
     """
 
-    def __init__(self, area_inferior, area_superior):
-        self.area_inferior = area_inferior
-        self.area_superior = area_superior
+    def __init__(self, thiner_area, coarser_area):
+        self.thiner_area = thiner_area
+        self.coarser_area = coarser_area
 
-    def concentracion_espacial(self, x, id_inferior, id_superior):
-        x["categoria_area_superior"] = x[id_superior].map(
-            self.area_superior["categoria"]
+    def spatial_dissimilarity(self, idx_coarser_area, var_name, cat_name):
+
+        # coarser area totals
+        coarser_area_tot_var = self.thiner_area.groupby(idx_coarser_area)[[var_name]].sum()
+        coarser_area_tot_cat = self.thiner_area.groupby(idx_coarser_area)[[cat_name]].sum()
+        coarser_area_totals = coarser_area_tot_var.join(coarser_area_tot_cat)
+        coarser_area_totals.columns = [var_name, cat_name]
+
+        # thiner area totals
+        total_var_col, total_cat_col = f"tot_{var_name}_coarser_area", f"tot_{cat_name}_coarser_area" 
+
+        self.thiner_area[total_var_col] = self.thiner_area[idx_coarser_area].map(
+            coarser_area_totals[var_name]
         )
-        x["variable_area_superior"] = x[id_superior].map(self.area_superior["variable"])
-
-        x["categoria_area_inferior"] = x[id_inferior].map(
-            self.area_inferior["categoria"]
+        self.thiner_area[total_cat_col] = self.thiner_area[idx_coarser_area].map(
+            coarser_area_totals[cat_name]
         )
-        x["variable_area_inferior"] = x[id_inferior].map(self.area_inferior["variable"])
 
-        x["CEC"] = np.abs(
-            (x["categoria_area_inferior"] / x["categoria_area_superior"])
-            - (
-                (x["variable_area_inferior"] - x["categoria_area_inferior"])
-                / (x["variable_area_superior"] - x["categoria_area_superior"])
+        # Dissimilarity Index at thiner area level
+        dissim_col_name = f"DI_{cat_name}"
+        dissim_areas = {}
+        self.thiner_area[dissim_col_name] = np.abs(
+            (self.thiner_area[cat_name] / self.thiner_area[total_cat_col]) - 
+            (
+            (self.thiner_area[var_name] - self.thiner_area[cat_name])/
+            (self.thiner_area[total_var_col] - self.thiner_area[total_cat_col])
             )
         )
+        thiner_area_cols = [c for c in self.thiner_area.columns if c != 'geometry'] + ['geometry']
+        dissim_thiner_area = self.thiner_area[thiner_area_cols].copy()
+        dissim_areas['thiner_dissim'] = dissim_thiner_area
+
+
+        # Dissimilarity Index at coarser area level
+        dissim_df = ((self.thiner_area.groupby([idx_coarser_area])[[dissim_col_name]].sum() * 0.5).round(3)).reset_index()
+        self.coarser_area[dissim_col_name] = dissim_df[dissim_col_name]
+        coarser_area_cols = [c for c in self.coarser_area.columns if c != 'geometry'] + ['geometry']
+        dissim_coarser_area = self.coarser_area[coarser_area_cols].copy()
+        dissim_areas['coarser_dissim'] = dissim_coarser_area
+
+        return dissim_areas
         
-        # Concentración espacial de la categoría
-        CEC = ((x.groupby([id_superior])[["CEC"]].sum() * 0.5).round(3)).reset_index()
+         
 
-        return CEC
-
-    # metodos para graficar resultados (estaticos)
-    def concentracion_espacial_plot(
-        self, x, id_inferior, id_superior, estadistico, categoria, chart
-    ):
+    # Methods to represent the spatial dissimilarity within urban areas
+    def noninteractive_dissimilarity_index(
+        self, x, idx_thiner_area, idx_coarser_area, cat_group, chart
+        ):
         if chart == "bar":
-            area_cec = self.concentracion_espacial(x, id_inferior, id_superior)
-            area_cec["CEC_100"] = round(area_cec["CEC"] * 100, 2)
+            df = self.spatial_dissimilarity(x, idx_thiner_area, idx_coarser_area)
+            df["DI_100"] = round(df["DI"] * 100, 2)
 
             fig, ax = plt.subplots()
-            area_cec.sort_values(by=estadistico, ascending=True).plot(
-                x=id_superior,
-                y="CEC_100",
+            df.sort_values(by="DI", ascending=True).plot(
+                x=idx_coarser_area,
+                y="DI_100",
                 kind="bar",
                 figsize=(18, 6),
                 legend=False,
                 ax=ax,
-                title="Disimilitud espacial de la categoría: %s" % (categoria),
+                title="Disimilitud espacial de la categoría: %s" % (cat_group),
                 color="#F5564E",
                 edgecolor="#FAB95B",
                 alpha=1,
@@ -87,25 +101,27 @@ class ContextoUrbano:
             plt.gca().set_yticklabels(
                 ["{:.0f}%".format(x) for x in plt.gca().get_yticks()]
             )
+            plt.tight_layout()
+            plt.close()
             return fig
 
         if chart == "scatter":
-            area_cec = self.concentracion_espacial(x, id_inferior, id_superior)
-            area_cec["CEC_100"] = round(area_cec["CEC"] * 100, 2)
-            area_cec["variable"] = area_cec[id_superior].map(
-                self.area_superior["variable"]
+            df = self.spatial_dissimilarity(x, idx_thiner_area, idx_coarser_area)
+            df["DI_100"] = round(df["DI"] * 100, 2)
+            df["tot_var"] = df[idx_thiner_area].map(
+                self.coarser_area["tot_var_coarser_area"]
             )
-            area_cec["categoria"] = area_cec[id_superior].map(
-                self.area_superior["categoria"]
+            df["tot_cat"] = df[idx_coarser_area].map(
+                self.coarser_area["tot_cat_coarser_area"]
             )
-            area_cec["%_categoria"] = round(
-                (area_cec["categoria"] / area_cec["variable"] * 100), 2
+            df["pct_cat"] = round(
+                (df["tot_cat"] / df["tot_var"] * 100), 2
             )
 
-            cec_cat = sns.lmplot(
-                x="%_categoria",
-                y="CEC_100",
-                data=area_cec,
+            ax = sns.lmplot(
+                x="pct_cat",
+                y="DI_100",
+                data=df,
                 aspect=2,
                 height=7.5,
                 line_kws={"color": "lightblue"},
@@ -113,17 +129,17 @@ class ContextoUrbano:
                 fit_reg=True,
             )
 
-            cec_cat.fig.suptitle(
-                "Disimilitud espacial del atributo VS Porcentaje por area superior",
+            ax.fig.suptitle(
+                "Disimilitud espacial VS Porcentaje de la categoria por area superior",
                 fontsize=15,
                 x=0.54,
                 y=1.02,
             )
             plt.xlabel(
-                "Porcentaje de %s por %s" % (categoria, id_superior), labelpad=20
+                "Porcentaje de %s por %s" % (cat_group, idx_thiner_area), labelpad=20
             )
             plt.ylabel(
-                "Disimilitud espacial de la categoría: %s" % (categoria), labelpad=20
+                "Disimilitud espacial de la categoría: %s" % (cat_group), labelpad=20
             )
             plt.grid(axis="y", c="grey", alpha=0.1)
             plt.grid(axis="x", c="grey", alpha=0.1)
@@ -141,32 +157,33 @@ class ContextoUrbano:
                     ax.text(point["x"] + 0.02, point["y"], str(point["val"]))
 
             label_point(
-                area_cec["%_categoria"],
-                area_cec["CEC_100"],
-                area_cec.iloc[:, 0],
+                df["pct_cat"],
+                df["DI_100"],
+                df.iloc[:, 0],
                 plt.gca(),
             )
 
             plt.tight_layout()
-            return cec_cat.fig
+            plt.close()
+            return ax.fig
 
-    def concentracion_espacial_plotly(
-        self, x, id_inferior, id_superior, estadistico, categoria, chart
+    def interactive_dissimilarity_index(
+        self, x, idx_thiner_area, idx_coarser_area, cat_group, chart
     ):
         if chart == "bar":
-            area_cec = self.concentracion_espacial(x, id_inferior, id_superior)
-            area_cec["CEC_100"] = round(area_cec["CEC"] * 100, 2)
-            area_cec = area_cec.sort_values(by=estadistico, ascending=True)
+            df = self.spatial_dissimilarity(x, idx_thiner_area, idx_coarser_area)
+            df["DI_100"] = round(df["DI"] * 100, 2)
+            df = df.sort_values(by="DI", ascending=True)
 
             fig, ax = plt.subplots()
-            area_cec.sort_values(by=estadistico, ascending=True).plot(
-                x=id_superior,
-                y="CEC_100",
+            df.sort_values(by="DI", ascending=True).plot(
+                x=idx_coarser_area,
+                y="DI_100",
                 kind="bar",
                 figsize=(18, 6),
                 legend=False,
                 ax=ax,
-                title="Disimilitud espacial de la categoría: %s" % (categoria),
+                title="Disimilitud espacial de la categoría: %s" % (cat_group),
                 color="#F5564E",
                 edgecolor="#FAB95B",
                 alpha=1,
@@ -175,12 +192,14 @@ class ContextoUrbano:
             fig = go.Figure(
                 data=[
                     go.Bar(
-                        x=area_cec[id_superior],
-                        y=area_cec["CEC_100"],
+                        x=df[idx_coarser_area],
+                        y=df["DI_100"],
                         hovertemplate="Indice de disimilitud espacial: %{y:.2f}% <extra></extra>",
                         marker={
                             "color": "rgba(240, 240, 240, 1.0)",
-                            "line": {"width": 0},
+                            "line": {
+                                "width": 0
+                                     },
                         },
                     ),
                 ]
@@ -198,7 +217,7 @@ class ContextoUrbano:
                 width=1000,
                 height=500,
                 title="Disimilitud espacial de la categoría '{}' por área superior".format(
-                    categoria
+                    cat_group
                 ),
                 plot_bgcolor="white",
                 hoverlabel=dict(bgcolor="white"),
@@ -212,46 +231,46 @@ class ContextoUrbano:
             return fig
 
         if chart == "scatter":
-            area_cec = self.concentracion_espacial(x, id_inferior, id_superior)
-            area_cec["CEC_100"] = round(area_cec["CEC"] * 100, 2)
-            area_cec["variable"] = area_cec[id_superior].map(
-                self.area_superior["variable"]
+            df = self.spatial_dissimilarity(x, idx_thiner_area, idx_coarser_area)
+            df["DI_100"] = round(df["DI"] * 100, 2)
+            df["tot_var"] = df[idx_coarser_area].map(
+                self.area_superior["tot_var_coarser_area"]
             )
-            area_cec["categoria"] = area_cec[id_superior].map(
-                self.area_superior["categoria"]
+            df["tot_cat"] = df[idx_coarser_area].map(
+                self.df["tot_cat_coarser_area"]
             )
-            area_cec["%_categoria"] = round(
-                (area_cec["categoria"] / area_cec["variable"] * 100), 2
+            df["pct_cat"] = round(
+                (df["tot_cat"] / df["tot_var"] * 100), 2
             )
-            area_cec["hover_names"] = area_cec[id_superior] + ": "
-            area_cec["hover_values"] = (
-                area_cec["%_categoria"].astype(str)
+            df["hover_names"] = df[idx_coarser_area] + ": "
+            df["hover_values"] = (
+                df["%_categoria"].astype(str)
                 + "%"
                 + ", "
-                + area_cec["CEC_100"].astype(str)
+                + df["DI_100"].astype(str)
                 + "%"
             )
-            area_cec["hover_label"] = area_cec["hover_names"] + area_cec["hover_values"]
+            df["hover_label"] = df["hover_names"] + df["hover_values"]
 
-            customdata = np.stack((area_cec[id_superior]), axis=-1)
+            #customdata = np.stack((df[id_superior]), axis=-1)
 
             dataPoints = go.Scatter(
-                x=area_cec["%_categoria"],
-                y=area_cec["CEC_100"],
+                x=df["pct_cat"],
+                y=df["DI_100"],
                 mode="markers",
                 marker=dict(opacity=0.5),
-                text=area_cec["hover_label"],
+                text=df["hover_label"],
                 hoverinfo="text",
                 showlegend=False,
             )
 
-            x = sm.add_constant(area_cec["%_categoria"])
-            model = sm.OLS(area_cec["CEC_100"], x).fit()
-            area_cec["bestfit"] = model.fittedvalues
+            x = sm.add_constant(df["pct_cat"])
+            model = sm.OLS(df["DI_100"], x).fit()
+            df["bestfit"] = model.fittedvalues
 
             lineOfBestFit = go.Scatter(
-                x=area_cec["%_categoria"],
-                y=area_cec["bestfit"],
+                x=df["pct_cat"],
+                y=df["bestfit"],
                 # name='Línea de ajuste',
                 mode="lines",
                 line=dict(color="firebrick", width=2),
@@ -262,11 +281,11 @@ class ContextoUrbano:
 
             layout = go.Layout(
                 title="Disimilitud vs. Porcentaje de la categoría '{}' por area superior".format(
-                    categoria
+                    cat_group
                 ),
-                xaxis=dict(title="Porcentaje de %s por %s" % (categoria, id_superior)),
+                xaxis=dict(title="Porcentaje de %s por %s" % (cat_group, idx_coarser_area)),
                 yaxis=dict(
-                    title="Concentración espacial de la categoría: %s" % (categoria)
+                    title="Disimilitud espacial de la categoría: %s" % (cat_group)
                 ),
                 hovermode="closest",
             )
@@ -292,67 +311,26 @@ class ContextoUrbano:
 
             return fig
 
-    def __call__(self, x, id_inferior, id_superior):
-        return self.concentracion_espacial(x, id_inferior, id_superior)
+    def __call__(self, idx_coarser_area, var_name, cat_name):
+        return self.spatial_dissimilarity(idx_coarser_area, var_name, cat_name)
 
-    def __call__(self, x, id_inferior, id_superior, estadistico, categoria, chart):
-        return self.concentracion_espacial_plot(
-            x, id_inferior, id_superior, estadistico, categoria, chart
-        )
+    def __call__(self, x, idx_thiner_area, idx_coarser_area, cat_group, chart):
+        return self.noninteractive_dissimilarity_index(
+            x, idx_thiner_area, idx_coarser_area, cat_group, chart)
 
-    def __call__(self, x, id_inferior, id_superior, estadistico, categoria, chart):
-        return self.concentracion_espacial_plotly(
-            x, id_inferior, id_superior, estadistico, categoria, chart
-        )
+    def __call__(self, x, idx_thiner_area, idx_coarser_area, cat_group, chart):
+        return self.interactive_dissimilarity_index(
+            x, idx_thiner_area, idx_coarser_area, cat_group, chart)
 
 
-def atributos_urbanos(inferior_gdf, idas, idai, universo, categoria):
+def CityGenerator(thiner_geom,
+    coarser_geom,
+    coarser_geom_idx,
+    total_population,
+    group_population,
+    operation):
     """
-    Agrupa los totales de la variable y categoría deseada a un nivel administrativo
-    superior y los mapea en el gdf de nivel administrativo inferior
-     ...
-    Parametros:
-    -----------
-    inferior_gdf(gdf): area de análisis de nivel administrativo inferior
-    idas(str): id del area administrativa superior
-    idai(str): id del area administrativa inferior
-    universo(str): nombre de la variable que contiene el universo
-                   total de nuestra categoría (e.g.: "hogares","viviendas","personas")
-    categria(str): nombre de la categoría en la que se clasifica
-                   nuestra variable de análisis (e.g.: "hogares con NBI","viviendas recuperables")
-    Devuelve:
-    -------
-    dict: dataframes con totales para cada nivel administrativo
-    """
-
-    # area administrativa superior
-    # total_universo_as = inferior_gdf.groupby(idas)[['VIVIEND']].sum()
-    # total_categoria_as = inferior_gdf.groupby(idas)[['recuperables']].sum()
-    total_universo_as = inferior_gdf.groupby(idas)[[universo]].sum()
-    total_categoria_as = inferior_gdf.groupby(idas)[[categoria]].sum()
-    area_superior = total_universo_as.join(total_categoria_as)
-    area_superior.columns = ["variable", "categoria"]
-
-    # thiner area
-    area_inferior = inferior_gdf.set_index(idai).loc[:, [universo, categoria]]
-    area_inferior.columns = ["variable", "categoria"]
-
-    return {"superior": area_superior, "inferior": area_inferior}
-
-
-def construye_territorio(
-    gdf,
-    nombre_unidad_s,
-    nombre_unidad_i,
-    nombre_variable,
-    nombre_categoria,
-    estadistico,
-    tipo,
-    dinamico=False,
-):
-    """
-    Realza una selección total o parcial dentro de un área metropolitana
-    y la caracteriza a partir de su contexto urbano.
+    
     ...
     Parametros:
     -----------
@@ -364,9 +342,10 @@ def construye_territorio(
     nombre_categoría (str): nombre de la categoría contenida dentro de un universo o población
                             mayor (e.g.: "hogares con nbi", "viviendas recuperables", "mujeres", etc.)
     estadístico (str): nombre del indicador con el que se describe el recorte territorial.
-                       Cada uno corresponde a un método de la clase "ContextoUrbano"
+                       Cada uno corresponde a un método de la clase "UrbanFeatures"
                        (e.g.: "CEC", etc.)
-    tipo (str): tipo de gráfico de salida para el método concentracion_espacial_plot()
+    VisObjRep (str): Visual object representation of the UrbanFeatures instantiated class 
+    
     dinamico (bool): grafico dinamico (Plotly) o estatico (sns+matplotlib)
     Devuelve:
     -------
@@ -374,42 +353,48 @@ def construye_territorio(
     pandas.dataframe:  totales de un índice para cada nivel administrativo
     """
 
-    unidad_administrativa = atributos_urbanos(
-        inferior_gdf=gdf,
-        idas=nombre_unidad_s,
-        idai=nombre_unidad_i,
-        universo=nombre_variable,
-        categoria=nombre_categoria,
+    city = UrbanFeatures(
+        thiner_area=thiner_geom, 
+        coarser_area=coarser_geom
     )
 
-    territorio = ContextoUrbano(
-        unidad_administrativa["inferior"], unidad_administrativa["superior"]
-    )
+    #operation = {'stat':'spatial_dissimilarity', 'VisObjRep':'scatter', 'dynamic_mode':_True}
 
-    if estadistico:
-        if dinamico:
-            return territorio.concentracion_espacial_plotly(
-                x=gdf,
-                id_inferior=nombre_unidad_i,
-                id_superior=nombre_unidad_s,
-                estadistico=estadistico,
-                categoria=nombre_categoria,
-                chart=tipo,
-            )
-
+    if operation['stat'] == "spatial dissimilarity":
+        if operation['VisObjRep'] == None:
+            DI = city.spatial_dissimilarity( 
+                            idx_coarser_area=coarser_geom_idx, 
+                            var_name=total_population, 
+                            cat_name=group_population
+                            )
+            return DI
+        '''
         else:
-            return territorio.concentracion_espacial_plot(
-                x=gdf,
-                id_inferior=nombre_unidad_i,
-                id_superior=nombre_unidad_s,
-                estadistico=estadistico,
-                categoria=nombre_categoria,
-                chart=tipo,
-            )
-    else:
-        return territorio.concentracion_espacial(
-            x=gdf, id_inferior=nombre_unidad_i, id_superior=nombre_unidad_s
-        )
+            # Returns the visual representation of spatial dissimilarity
+            if operation['dynamic_mode']:
+                # Using dynamic charts
+                fig = city.interactive_dissimilarity_index(
+                        x=gdf,
+                        idx_thiner_area=nombre_unidad_i,
+                        idx_coarser_area=nombre_unidad_s,
+                        categoria=cat_group,
+                        chart=operation['VisObjRep']
+                        )
+                return fig
+
+            else:
+                # Using static charts
+                fig = city.noninteractive_dissimilarity_index(
+                        x=gdf,
+                        idx_thiner_area=nombre_unidad_i,
+                        idx_coarser_area=nombre_unidad_s,
+                        categoria=cat_group,
+                        chart=operation['VisObjRep']
+                        )
+                return fig
+    '''
+        
+        
 
 
 def radios_inmat_2010(region_name, geog, vals):

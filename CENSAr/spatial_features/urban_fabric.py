@@ -497,20 +497,6 @@ def CityGenerator(
                 )
                 return fig       
 
-def radios_inmat_2010(region_name, geog, vals):
-    geog["str_link"] = geog["int_link"].apply(lambda x: "0" + str(x))
-    vals["str_link"] = vals["Codigo"].apply(lambda x: "0" + str(x))
-    vals["cod_depto"] = vals["str_link"].apply(lambda x: x[:5])
-    gdf = pd.merge(geog, vals, on="str_link")
-
-    if region_name != "Capital Federal":
-        inmat_gba24 = reformat_inmat_2010(gdf)
-        inmat_region = inmat_gba24.loc[inmat_gba24["region"] == region_name].copy()
-    else:
-        inmat_caba = reformat_inmat_2010(gdf)
-        inmat_region = inmat_caba.copy()
-
-    return inmat_region
 
 
 

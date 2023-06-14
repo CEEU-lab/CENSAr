@@ -412,7 +412,6 @@ class UrbanFeatures:
                 thiner_area_name=idx_thiner_area,
                 coarser_area=coarser_dissim,
                 coarser_area_name=idx_coarser_area,
-                nombre_region='Borrar parametro',
                 map_height=1000,
                 bins_classificator = 'NaturalBreaks',
                 legend_builder={'thiner_area':False, 'coarser_area':True}

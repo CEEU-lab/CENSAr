@@ -8,26 +8,54 @@ from CENSAr.datasources import (
     persproy_depto_2025,
 )
 
-from CENSAr.modeling_tools import (
+from CENSAr.spatial_distributions.modeling_tools import (
     simulate_total_var, 
     simulate_cat_var
 )
 
-from CENSAr.vector_data_analysis.geoprocessing import (from_wkt, build_thiner_pct_in_coarser_geom)
+from CENSAr.spatial_distributions.geo_utils import (
+    from_wkt, 
+    build_thiner_pct_in_coarser_geom
+)
 from CENSAr.aggregation import named_aggregation
 
-def resistencia_stquo_scenario(path00, path10, path_20):
-    # rasterdata_analysis outputs_
-    envolvente_resistencia_00 = gpd.read_file(path00)
-    envolvente_resistencia_10 = gpd.read_file(path10)
-    envolvente_resistencia_20 = gpd.read_file(path_20)
+def resistencia_stquo_2020(
+        path00: str, 
+        path10: str, 
+        path_20: str):
+    """
+    Loads an urban growth scenario defined for a projection year
 
-    # se cargan las geometrías de las tres fotos censales
-    chaco_2001 = radios_prov(year=2001, prov="chaco", mask=envolvente_resistencia_00)
-    chaco_2010 = radios_prov(year=2010, prov="chaco", mask=envolvente_resistencia_10)
-    chaco_2020 = radios_prov(year=2010, prov="chaco", mask=envolvente_resistencia_20)
+    Parameters
+    ----------
+    path00 : str
+        Directory route to the urban footprint vector data 
+        generated with rasterdata module for 2000.
+    path10 : str
+        Directory route to the urban footprint vector data 
+        generated with rasterdata module for 2010.
+    path20 : str
+        Directory route to the urban footprint vector data 
+        generated with rasterdata module for 2020.
 
-    # se cargan las tablas de personas para estimar el total de viviendas 2020
+    Returns
+    -------
+    scenario:dict
+        Aggregated indicators with 2020 simulated distributions,
+        2010 and 2001 observed distributions, urban footprint vector data
+        and scenario metadata.
+    """
+    # rasterdata_analysis outputs
+    footprint_resistencia_00 = gpd.read_file(path00)
+    footprint_resistencia_10 = gpd.read_file(path10)
+    footprint_resistencia_20 = gpd.read_file(path_20)
+
+    # Loads census tracts within footprint limit
+    chaco_2001 = radios_prov(year=2001, prov="chaco", mask=footprint_resistencia_00)
+    chaco_2010 = radios_prov(year=2010, prov="chaco", mask=footprint_resistencia_10)
+    chaco_2020 = radios_prov(year=2010, prov="chaco", mask=footprint_resistencia_20)
+
+    # Estimates total dwelling units in 2020 based on persons tables (2001 & 2010)
     tipo_2001 = tipoviv_radios_prov(
         year=2001,
         prov="chaco",
@@ -49,16 +77,16 @@ def resistencia_stquo_scenario(path00, path10, path_20):
     )
     tipo_2020_geo = chaco_2020.set_index("link").join(tipo_2020.set_index("link"))
 
-    # Tablas REDATAM - Total personas en 2001 y 2010
+    # REDATAM - Total persons 2001 & 2010
     pers_2001 = personas_radios_prov(year=2001, prov="chaco", var_types={"link": "object"})
     pers_2001_geo = chaco_2001.set_index("link").join(pers_2001.set_index("link"))
     pers_2010 = personas_radios_prov(year=2010, prov="chaco", var_types={"link": "object"})
     pers_2010_geo = chaco_2010.set_index("link").join(pers_2010.set_index("link"))
 
-    # Tabla de proyecciones de poblacion por departamento
+    # Projected population by department
     proy = persproy_depto_2025(prov="chaco")
 
-    # Total viviendas 2020
+    # Total dwelling units 2020
     tipo_2020_geo["total"] = simulate_total_var(
         gdf_pers_01=pers_2001_geo,
         gdf_var_01=tipo_2001_geo,
@@ -71,7 +99,7 @@ def resistencia_stquo_scenario(path00, path10, path_20):
         catname="total",
     )
 
-    # Indicadores agregados
+    # Aggregations
     tipo_vivienda_agg_2001 = named_aggregation(
         tipo_2001_geo, name="tipo vivienda particular"
     )
@@ -82,15 +110,25 @@ def resistencia_stquo_scenario(path00, path10, path_20):
         tipo_2020_geo, name="tipo vivienda particular"
     )
 
-    # Vector de calibracion (superficie informal)
+    # Calibration vector (informal settlements surface)
     url = "https://storage.googleapis.com/python_mdg/censar_data/informal_settlements_072022.csv"
-    asentamientos = pd.read_csv(url)
-    asentamientos_gdf = from_wkt(df=asentamientos, wkt_column='geometry')
+    inf_settl = pd.read_csv(url)
+    inf_settl_gdf = from_wkt(df=inf_settl, wkt_column='geometry')
 
     tipo_2020_reset = tipo_2020_geo.reset_index()
-    calibration_weights = build_thiner_pct_in_coarser_geom(coarser_geom=tipo_2020_reset, thiner_geom=asentamientos_gdf,
-                                                        coarser_idx='link', thiner_idx='id_renabap', crs=5347, coarser_tot=False)
+    calibration_weights = build_thiner_pct_in_coarser_geom(
+        coarser_geom=tipo_2020_reset, 
+        thiner_geom=inf_settl_gdf,
+        coarser_idx='link', 
+        thiner_idx='id_renabap', 
+        crs=5347, 
+        coarser_tot=False
+    )
 
+    # Scenario main definition
+    # 1. Combines aggregated indicators distributions observed by tract in 2001-2010 
+    # 2. Percentage of informal settlement land within the tract (respecting the total informal area)
+    # 3. Porcentaje of housing informality in the city (3.5%) 
     informal_simulated_distribution = simulate_cat_var(
         gdf_var_01=tipo_vivienda_agg_2001,
         gdf_var_10=tipo_vivienda_agg_2020,
@@ -113,9 +151,9 @@ def resistencia_stquo_scenario(path00, path10, path_20):
     scenario = {2001:tipo_vivienda_agg_2001, 
                 2010:tipo_vivienda_agg_2010, 
                 2020:tipo_vivienda_agg_2020,
-                'env01':envolvente_resistencia_00,
-                'env10':envolvente_resistencia_10,
-                'env20':envolvente_resistencia_20,
+                'footpr01':footprint_resistencia_00,
+                'footpr10':footprint_resistencia_10,
+                'footpr20':footprint_resistencia_20,
                 'agg':True,
                 'calibration':True,
                 'pct_val':3.5}

@@ -8,4 +8,6 @@ geopandas
 folium
 mapclassify
 rtree
+esda
+splot
 nbformat

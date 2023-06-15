@@ -10,4 +10,5 @@ mapclassify
 rtree
 esda
 splot
+h3pandas
 nbformat

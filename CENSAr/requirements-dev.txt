@@ -8,6 +8,9 @@ geopandas
 folium
 mapclassify
 rtree
+esda
+pysal
+h3pandas
 nbformat
 srsly
 pydantic

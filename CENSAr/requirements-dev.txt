@@ -9,7 +9,7 @@ folium
 mapclassify
 rtree
 esda
-splot
+pysal
 h3pandas
 nbformat
 srsly

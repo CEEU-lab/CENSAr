@@ -151,7 +151,6 @@ def observed_dist(catname, idx_col, base_year, gdf_base, gdf_forecast):
     if type(catname) is dict:
         # overwrites category name based on the observed year
         catname = catname[base_year]
-
     tract_pct = gdf_base[catname] / gdf_base[catname].sum()
     cat_dist = dict(zip(tract_pct.index, tract_pct.values))
     gdf_reset = gdf_forecast.reset_index()
@@ -206,7 +205,7 @@ def var_forecast(
     else:
         # 2020 geometries are available
         if base_year not in ["2001", "2010"]:
-            idx_col = "link_"
+            idx_col = "link"
         else:
             idx_col = f"link_{base_year}"
 
@@ -235,16 +234,16 @@ def var_forecast(
     else:
         data = {"2001": gdf_2001, "2010": gdf_2010}
         for year in ["2001", "2010"]:
-            if idx_col == "link_":
-                idx_col = f"link_{year}"
+            if idx_col == "link":
+                idx_col_year = f"link_{year}"
             dist_dict = observed_dist(
                 catname=catname,
-                idx_col=idx_col,
+                idx_col=idx_col_year,
                 base_year=year,
                 gdf_base=data[year],
                 gdf_forecast=gdf_2020,
             )
-            gdf_2020[f"var_{year}"] = gdf_2020[idx_col].map(dist_dict)
+            gdf_2020[f"var_{year}"] = gdf_2020[idx_col_year].map(dist_dict)
 
         gdf_2020["var_0110"] = round(
             (gdf_2020["var_2001"] + gdf_2020["var_2010"]) / 2, 4
@@ -269,7 +268,7 @@ def var_forecast(
         gdf_2020[tot_colname].sum() * pct_target / 100
     )  # total number to be distributed by tract
     weights = dist_var.fillna(0) / dist_var.sum()
-
+    
     return totcat, weights
 
 
@@ -396,7 +395,7 @@ def simulate_cat_var(
         tot_colname=tot_colname,
         calibration_vector = calibration_vector
     )
-
+    
     sim_dist = distribute_totals_tract(
         tot_var=cat_var,
         weights=probs,

@@ -155,7 +155,7 @@ def inmat_radios_caba_2010(root=DATA_DIR):
 
 
 def tracts_matching_0110(prov, var_types, root=DATA_DIR):
-    filename = f"{prov}_conversion_010.csv"
+    filename = f"{prov}_tracts_pairing_0110.csv"
     path = os.path.join(root, filename)
     logger.info(f"loadding `{path}`")
 

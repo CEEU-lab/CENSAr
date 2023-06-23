@@ -451,7 +451,7 @@ def tracts_2020_to_2010(tracts_2020_gdf, tracts_2010_gdf):
     return tracts_2020_gdf
 
 
-def tracts_2010_to_2001(tracts_2020_gdf):
+def tracts_2010_to_2001(tracts_2020_gdf, prov_name):
     """
     Creates 2001 census link column for the 2020 census geodataframe.
 
@@ -468,10 +468,10 @@ def tracts_2010_to_2001(tracts_2020_gdf):
 
     if "link_2010" not in tracts_2020_gdf.columns:
         raise TypeError("GeoDataFrame must contain 2010 census link reference")
-
+    
     df = tracts_matching_0110(
-        prov="corrientes",
-        var_types={"Link01": "object", "Link10": "object"},
+        prov=prov_name,
+        var_types={"Link01": object, "Link10": object},
         root=DATA_DIR,
     )
     link2001 = dict(zip(df.Link10, df.Link01))

@@ -5,17 +5,20 @@ Combines vector and raster data to study the physical and qualitatuve growth of 
 
 **1. Urban extent detection**
 
-Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/raster_data_analysis) module to calculate Landsat or Sentinel imagery based indexes (e.g. `Urban Index (UI)`) for classification problems resolution (Urban Sprawl detection)
+Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/raster_data_analysis) module to calculate Landsat or Sentinel imagery based indexes (e.g. `Urban Index (UI)`) for classification problems resolution (Urban Sprawl detection):
 
 <p align="center">
-  <img src="CENSAr/img/urban_extent_detection.png" alt="Distribution of informal dwellings by census radius"/>
+  <img src="CENSAr/img/urban_extent_detection.png" alt="Urban Extent"/>
 </p>
 
 
 **2. Census Tract distributions**
 
 Simulate tracts distributions based on observed census data (`2001`, `2010`, `2020`)
-![Distribution of informal dwellings by census radius](CENSAr/img/informal_tracts_forecasting_2020.png)
+
+<p align="center">
+  <img src="CENSAr/img/informal_tracts_forecasting_2020.png" alt="Distribution of informal dwellings by census radius"/>
+</p>
 
 (...) modelling functions available on [spatial distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions)
 

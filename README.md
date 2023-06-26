@@ -17,7 +17,7 @@ Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/C
 Simulate tracts distributions based on observed census data (`2001`, `2010`, `2020`)
 
 <p align="center">
-  <img src="CENSAr/img/informal_tracts_forecasting_2020.png" alt="Distribution of informal dwellings by census radius"/>
+  <img src="CENSAr/img/informal_tracts_forecasting.png" alt="Informal dwellings by census radius"/>
 </p>
 
 (...) modelling functions available on [spatial distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions)

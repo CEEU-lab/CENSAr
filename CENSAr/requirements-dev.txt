@@ -14,5 +14,7 @@ h3pandas
 nbformat
 srsly
 pydantic
-
+rasterio
+scikit-image
+scikit-learn
 -e ../

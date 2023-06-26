@@ -1,22 +1,37 @@
-# CENSAr
-Esquemas de análisis poblacional
-> Este repositorio compila una serie de clases y métodos diseñados para descomponer un territorio urbano a partir de sus atributos censales. 
+# `CENSAr` 
+## Urban growth analysis tools
+
+Combines vector and raster data to study the physical and qualitatuve growth of urban areas. 
+
+**1. Urban extent detection**
+
+Solve classification problems calculating Landsat or Sentinel imagery based indexes (e.g. `Urban Index (UI)`) 
+![Distribution of informal dwellings by census radius](CENSAr/img/urban_extent_detection.png)
+
+(...) preliminar notebooks available on ![raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/raster_data_analysis)
+
+**2. Census Tract distributions**
+
+Simulate tracts distributions based on observed census data (`2001`, `2010`, `2020`)
+![Distribution of informal dwellings by census radius](CENSAr/img/informal_tracts_forecasting_2020.png)
+
+(...) modelling functions available on ![spatial distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions)
 
 
-La Clase `ContextoUrbano` tiene por finalidad instanciar un tejido urbano y describirlo en función de sus atributos estructurales.
-e.g.
+**3. Spatial features**
 
-**Segregación Urbana**
+Instatiate city objects and evaluate their spatial distribution of attributes
 
-```
-tejido_urbano = construye_territorio(gdf = polygons, # unidad administrativa inferior con atributo a ser evaluado
-                                     nombre_unidad_s = "COMUNA", # nombre de la unidad administrativa superior
-                                     nombre_unidad_i = "link", # nombre de la unidad administrativa inferior,
-                                     nombre_variable = "INMAT", # nombre de la variable a ser evaluada
-                                     nombre_categoria = "Recuperables"  # nombre de la categoría cuya distribución espacial se quiere verificar
-                                     )
-```
+* Spatial Dissimilitude
+![informal dwellings dissimilitude](CENSAr/img/spatial_dissim.png)
 
-![segregacion](CENSAr/img/segregacion.png)
+(...) indexes calculation available on ![spatial features](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_features)
 
-Para mayor detalle sobre el uso de esta clase se puede revisar el [dashboard](https://github.com/CEEU-lab/CENSAr/blob/main/CENSAr/dashboard.py#L103-L113) realizado con `streamlit`.
+**4. Spatial correlation**
+
+Detect variable groups concentration
+
+* Clustering
+![informal dwellings spatial correlation](CENSAr/img/spatial_correlation.png)
+
+(...) clustering functions available on ![clustering](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/clustering) 

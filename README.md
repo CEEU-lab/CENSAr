@@ -5,10 +5,12 @@ Combines vector and raster data to study the physical and qualitatuve growth of 
 
 **1. Urban extent detection**
 
-Solve classification problems calculating Landsat or Sentinel imagery based indexes (e.g. `Urban Index (UI)`) 
-![Distribution of informal dwellings by census radius](CENSAr/img/urban_extent_detection.png)
+Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/raster_data_analysis) module to calculate Landsat or Sentinel imagery based indexes (e.g. `Urban Index (UI)`) for classification problems resolution (Urban Sprawl detection)
 
-(...) preliminar notebooks available on [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/raster_data_analysis)
+<p align="center">
+  <img src="CENSAr/img/urban_extent_detection.png" alt="Distribution of informal dwellings by census radius"/>
+</p>
+
 
 **2. Census Tract distributions**
 

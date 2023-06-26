@@ -27,8 +27,11 @@ Simulate tracts distributions based on observed census data (`2001`, `2010`, `20
 
 Instatiate city objects and evaluate their spatial distribution of attributes
 
-* Spatial Dissimilitude
-![informal dwellings dissimilitude](CENSAr/img/spatial_dissimilitude.png)
+* **Spatial Dissimilitude**
+
+<p align="center">
+  <img src="CENSAr/img/spatial_dissimilitude.png" alt="informal dwellings dissimilitude"/>
+</p>
 
 (...) indexes calculation available on [spatial features](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_features)
 
@@ -36,7 +39,10 @@ Instatiate city objects and evaluate their spatial distribution of attributes
 
 Detect variable groups concentration
 
-* Clustering
-![informal dwellings spatial correlation](CENSAr/img/spatial_correlation.png)
+* **Clustering**
+
+<p align="center">
+  <img src="CENSAr/img/spatial_correlation.png" alt="informal dwellings spatial correlation"/>
+</p>
 
 (...) clustering functions available on [clustering](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/clustering) 

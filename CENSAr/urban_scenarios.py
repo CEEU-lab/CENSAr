@@ -152,7 +152,7 @@ def resistencia_stquo_2020(
         base_year="0110",
         forecast_year="2020",
         forecast_gdf=tipo_vivienda_agg_2020.reset_index(), #BUG FIX: better handling for idx_col
-        pct_val=7.3,
+        pct_val=4.55,
         catname={"2001": "informal", "2010": "informal"},
         tot_colname="total",
         calibration_vector={'weights':calibration_weights, 'mix_dist':True}
@@ -291,7 +291,7 @@ def corrientes_stquo_2020(
         base_year="0110",
         forecast_year="2020",
         forecast_gdf=tipo_vivienda_agg_2020, 
-        pct_val=5.95,
+        pct_val=3.65,
         catname={"2001": "informal", "2010": "informal"},
         tot_colname="total_viviendas",
         calibration_vector={'weights':calibration_weights, 'mix_dist':True}

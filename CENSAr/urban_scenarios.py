@@ -194,7 +194,7 @@ def resistencia_stquo_2020(
                 'footpr20':footprint_resistencia_20,
                 'agg':True,
                 'calibration':True,
-                'pct_val':7.3}
+                'pct_val':4.55}
     return scenario
 
 def corrientes_stquo_2020(
@@ -335,5 +335,5 @@ def corrientes_stquo_2020(
                 'footpr20':footprint_corrientes_20,
                 'agg':True,
                 'calibration':True,
-                'pct_val':5.95}
+                'pct_val':3.65}
     return scenario

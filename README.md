@@ -19,7 +19,11 @@ Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/C
 Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions) based on vectorized census data (`2001`, `2010`, `2020`)
 
 <p align="center">
-  <img src="CENSAr/img/informal_tracts_forecasting.png" alt="Informal dwellings by census radius"/>
+  <img src="CENSAr/img/informal_tracts_forecasting_resis.png" alt="Informal dwellings by census radius resistencia"/>
+</p>
+
+<p align="center">
+  <img src="CENSAr/img/informal_tracts_forecasting_ctes.png" alt="Informal dwellings by census radius corrientes"/>
 </p>
   
 
@@ -30,7 +34,7 @@ Instatiate city objects and evaluate their [spatial distribution of attributes](
 * **Spatial Dissimilitude**
 
 <p align="center">
-  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="500" height="400"/>
+  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="600" height="300"/>
 </p>
 
 

@@ -31,7 +31,7 @@ Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/
 
 Instatiate city objects and evaluate their [spatial distribution of attributes](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_features)
 
-* **Spatial Dissimilitude**
+*e.g.* **Spatial Dissimilitude**
 
 <p align="center">
   <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="600" height="300"/>

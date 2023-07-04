@@ -21,25 +21,29 @@ Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/
 <p align="center">
   <img src="CENSAr/img/informal_tracts_forecasting.png" alt="Informal dwellings by census radius"/>
 </p>
-
-
-**3. Spatial autocorrelation**
-
-Detect variable groups concentration with [clustering functionalities](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/clustering)
-
-*e.g.* **Clusters detection**
-
-<p align="center">
-  <img src="CENSAr/img/spatial_autocorrelation.png" alt="informal dwellings spatial correlation"/>
-</p>
   
 
-**4. Spatial features**
+**3. Spatial features**
 
 Instatiate city objects and evaluate their [spatial distribution of attributes](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_features)
 
 * **Spatial Dissimilitude**
 
 <p align="center">
-  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="300" height="200"/>
+  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="500" height="400"/>
+</p>
+
+
+**4. Spatial autocorrelation**
+
+Detect variable groups concentration with [clustering functionalities](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/clustering)
+
+*e.g.* **Clusters detection**
+
+<p align="center">
+  <img src="CENSAr/img/spatial_autocorrelation_resis.png" alt="informal dwellings spatial correlation resistencia"/>
+</p>
+
+<p align="center">
+  <img src="CENSAr/img/spatial_autocorrelation_ctes.png" alt="informal dwellings spatial correlation corrientes"/>
 </p>

@@ -41,5 +41,5 @@ Instatiate city objects and evaluate their [spatial distribution of attributes](
 * **Spatial Dissimilitude**
 
 <p align="center">
-  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude"/>
+  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="300" height="200"/>
 </p>

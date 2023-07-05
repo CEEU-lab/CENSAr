@@ -51,3 +51,35 @@ Detect variable groups concentration with [clustering functionalities](https://g
 <p align="center">
   <img src="CENSAr/img/spatial_autocorrelation_ctes.png" alt="informal dwellings spatial correlation corrientes"/>
 </p>
+
+## Installation
+
+* Set up your python environment:
+
+``` shell
+> virtualenv myvenv --python=python3.10
+> source venv/bin/activate
+```
+
+* Install the package
+
+``` shell
+> pip install -r requirements.txt
+```
+
+or 
+
+* Install the package in develop mode for constributions
+
+``` shell
+> python setup.py develop
+> pip install -r requirements-dev.txt
+```
+
+### Jupyter settings
+
+* Add your venv to jupyter kernels
+
+``` shell
+> ipython kernel install --name=myvenv --user
+```

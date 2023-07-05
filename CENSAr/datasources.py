@@ -2,7 +2,6 @@ import os
 import unicodedata
 
 import pandas as pd
-import streamlit as st
 import geopandas as gpd
 
 from CENSAr.logging import get_logger

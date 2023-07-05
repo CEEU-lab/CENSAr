@@ -1,14 +1,23 @@
-numpy >= 1.22.2
-pandas >= 1.4.1
-matplotlib >= 3.4.3
-seaborn
-plotly
-plotly_express
-geopandas
-folium
-mapclassify
-rtree
-esda
-pysal
+scikit-learn
+numpy 
+pandas 
+matplotlib 
+seaborn 
+folium 
+geopandas 
+mapclassify 
+rtree 
+plotly 
+plotly_express 
+rasterio 
+scikit-image 
+pydantic 
+srsly 
+more_itertools 
+h3 
 h3pandas
+libpysal
+esda 
+splot
 nbformat
+rich 

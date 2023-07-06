@@ -58,12 +58,13 @@ Detect variable groups concentration with [clustering functionalities](https://g
 
 ``` shell
 > virtualenv myvenv --python=python3.10
-> source venv/bin/activate
+> source myvenv/bin/activate
 ```
 
 * Install the package
 
 ``` shell
+> python setup.py install
 > pip install -r requirements.txt
 ```
 

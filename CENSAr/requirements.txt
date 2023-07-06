@@ -1,8 +1,3 @@
-scikit-learn
-numpy 
-pandas 
-matplotlib 
-seaborn 
 folium 
 geopandas 
 mapclassify 
@@ -20,4 +15,5 @@ libpysal
 esda 
 splot
 nbformat
-rich 
+rich
+../ 

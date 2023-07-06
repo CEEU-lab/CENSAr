@@ -24,8 +24,9 @@ setup(
         "numpy >= 1.22.2",
         "pandas >= 1.4.1",
         "matplotlib >= 3.4.3",
-        "seaborn == 0.12.2",
-        "geopandas == 0.13.0",
-        "mapclassify == 2.5.0",
-        "rtree == 1.0.1"],
+        "seaborn >= 0.12.2",
+        ],
+    include_package_data=True,
+    package_dir={'CENSAr':'CENSAr/'},
+    package_data={'CENSAr': ['aggregation/*.yaml']}
 )

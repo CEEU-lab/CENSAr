@@ -11,9 +11,7 @@ srsly
 more_itertools 
 h3 
 h3pandas
-libpysal
-esda 
-splot
+pysal
 nbformat
 rich
 ../ 

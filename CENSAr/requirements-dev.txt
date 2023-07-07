@@ -11,8 +11,7 @@ srsly == 2.4.6
 more_itertools == 9.1.0
 h3 == 3.7.6
 h3pandas == 0.2.4
-libpysal == v4.7.0
-esda == v2.4.1
+pysal == v23.1
 splot == 1.1.5.post1
 nbformat == 5.9.0
 rich == 13.4.2

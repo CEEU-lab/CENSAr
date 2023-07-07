@@ -14,7 +14,8 @@ from CENSAr.spatial_distributions.modeling_tools import (
     simulate_total_var, 
     simulate_cat_var,
     tracts_2020_to_2010,
-    tracts_2010_to_2001
+    tracts_2010_to_2001,
+    observed_dist
 )
 
 from CENSAr.spatial_distributions.geo_utils import (
@@ -94,15 +95,14 @@ def resistencia_stquo_2020(
 
     # Total dwelling units 2020
     tipo_2020_geo["total"] = simulate_total_var(
-        gdf_pers_01=pers_2001_geo,
-        gdf_var_01=tipo_2001_geo,
-        gdf_pers_10=pers_2010_geo,
-        gdf_var_10=tipo_2010_geo,
-        proy_df=proy,
-        namedept="San Fernando",
+        estimate_totals={'proy_df': proy, 'namedept': 'San Fernando'},
         base_year="2010",
         forecast_year="2020",
         catname="total",
+        gdf_pers_01=pers_2001_geo,
+        gdf_var_01=tipo_2001_geo,
+        gdf_pers_10=pers_2010_geo,
+        gdf_var_10=tipo_2010_geo
     )
 
     # status quo: avoid dwelling units relocation
@@ -145,7 +145,7 @@ def resistencia_stquo_2020(
     # Scenario main definition
     # 1. Combines aggregated indicators distributions observed by tract in 2001-2010 
     # 2. Percentage of informal settlement land within the tract (respecting the total informal area)
-    # 3. Porcentaje of housing informality in the city (7.3%) # avg between 2001 and 2010 
+    # 3. Porcentaje of housing informality in the city (4.55%) # avg between 2001 and 2010 
     informal_simulated_distribution = simulate_cat_var(
         gdf_var_01=tipo_vivienda_agg_2001,
         gdf_var_10=tipo_vivienda_agg_2010,
@@ -198,10 +198,11 @@ def resistencia_stquo_2020(
     return scenario
 
 def corrientes_stquo_2020(
-        path00: str, 
-        path10: str, 
-        path_20: str,
-        control_flow: dict = {'allocation_method':'avoid_relocations'}):
+    path00: str, 
+    path10: str, 
+    path_20: str,
+    projected_population: int,
+    control_flow: dict = {'allocation_method':'avoid_relocations'}):
     """
     Loads an urban growth scenario defined for a projection year
 
@@ -216,7 +217,9 @@ def corrientes_stquo_2020(
     path20 : str
         Directory route to the urban footprint vector data 
         generated with rasterdata module for 2020.
-    control_flow : dict
+    projected_population : int
+        Total dwelling units in the forecast year
+    control_flow : dict, default {[str]:[str]}
         Wether to allow or avoid negative values by census tract
         after simulation.
 
@@ -235,25 +238,76 @@ def corrientes_stquo_2020(
     # Loads census tracts within footprint limit
     corrientes_2001 = radios_prov(year=2001, prov="corrientes", mask=footprint_corrientes_00)
     corrientes_2010 = radios_prov(year=2010, prov="corrientes", mask=footprint_corrientes_10)
-    corrientes_2020 = radios_precenso_2020(geo_filter=None, mask=footprint_corrientes_20)
+    corrientes_2020 = radios_prov(year=2010, prov="corrientes", mask=footprint_corrientes_20)
 
+    # Dwelling units 2001/2010
     tipo_2001 = tipoviv_radios_prov(
-        year=2001, prov="corrientes", var_types={"LINK": "object"}
+        year=2001,
+        prov="corrientes",
+        var_types={"LINK": "object"},
     )
     tipo_2001_geo = corrientes_2001.set_index("link").join(tipo_2001.set_index("link"))
-
-    tipo_2010 = tipoviv_radios_prov(year=2010, prov="corrientes", var_types={"link": "object"})
-    tipo_2010_geo = corrientes_2010.set_index("link").join(tipo_2010.set_index("link"))
-
-    corrientes_2020_ = tracts_2020_to_2010(
-        tracts_2020_gdf=corrientes_2020, tracts_2010_gdf=corrientes_2010
+    tipo_2010 = tipoviv_radios_prov(
+        year=2010,
+        prov="corrientes",
+        var_types={"link": "object"},
     )
-    # Informative print
-    print(corrientes_2020_["link_2010"].isna().unique())
-
+    tipo_2010_geo = corrientes_2010.set_index("link").join(tipo_2010.set_index("link"))
+    
     # Simulation canvas
-    tipo_2020_geo = tracts_2010_to_2001(tracts_2020_gdf=corrientes_2020_, prov_name='corrientes')
+    corrientes_2020.set_index('link', inplace=True)
+    corrientes_2020['link_2010'] = corrientes_2020.index
+    tipo_2020_geo = tracts_2010_to_2001(tracts_2020_gdf=corrientes_2020, prov_name='corrientes')
 
+    # Calibration weights:
+    # Uses "total_dwelling_units" for census locations over 2000 inhabitans
+    corrientes_2020_ = radios_precenso_2020(
+    geo_filter={"prov": "18", "depto": "021"}, 
+    mask=None
+    )
+
+    corrientes_2020_['geometry'] = corrientes_2020_['geometry'].centroid
+    total_2020 = tipo_2020_geo.sjoin(corrientes_2020_[['link','total_viviendas','geometry']], predicate='contains')
+    total_2020.rename(columns={'link':'link_2020', 'total_viviendas':'total_2020'}, inplace=True)
+    total_2020.drop(columns='index_right', inplace=True)
+    dwelling_units_2020 = dict(zip(total_2020['link_2010'],total_2020['total_2020']))
+    tipo_2020_geo['total_2020'] = tipo_2020_geo['link_2010'].map(dwelling_units_2020)
+    dwelling_units_2010 = dict(zip(tipo_2010_geo.index,tipo_2010.total))
+    tipo_2020_geo['total_2010'] = tipo_2020_geo['link_2010'].map(dwelling_units_2010)
+    
+    # Census areas under this population limit uses 2010 dwelling units values
+    tipo_2020_geo['total_2020'].fillna(tipo_2020_geo['total_2010'], inplace=True)
+    
+    # Dwelling units distribution (uses 2020 for metropolitan area + 2010 for areas under 2000 inhab)
+    du_dist_2020 = observed_dist(catname='total_2020', 
+                                 idx_col=None, 
+                                 base_year=None, 
+                                 gdf_base=tipo_2020_geo, 
+                                 gdf_forecast=None)
+    
+    observed_2020 = pd.Series(du_dist_2020)
+    tipo_2020_geo.drop(columns=['total_2010','total_2020'], inplace=True)
+
+    # Total dwelling units 2020
+    tipo_2020_geo["total"] = simulate_total_var(
+        estimate_totals = {'user_defined': projected_population, 
+                           'weights':observed_2020},   
+        base_year="2010",
+        forecast_year="2020",
+        catname="total",
+        gdf_var_10=tipo_2010_geo
+    )
+
+    # status quo: avoid dwelling units relocation
+    total_2010 = dict(zip(tipo_2010_geo.index, tipo_2010_geo.total))
+    tipo_2020_geo['total_2010'] = tipo_2020_geo['link_2010'].map(total_2010)
+    tipo_2020_geo["diff"] = tipo_2020_geo["total"] - tipo_2020_geo["total_2010"] 
+    neg_diff = tipo_2020_geo.loc[tipo_2020_geo['diff']< 0,['diff','total_2010']].copy()
+    neg_diff['diff'] = neg_diff['diff'] * -1
+    tipo_2020_geo.loc[tipo_2020_geo['diff']< 0,'total'] = neg_diff.sum(axis=1)
+
+    print('Adjusted_total: {}'.format(tipo_2020_geo['total'].sum()))
+    tipo_2020_geo.drop(columns=['total_2010','diff'], inplace=True)
 
     # Aggregations
     tipo_vivienda_agg_2001 = named_aggregation(
@@ -264,7 +318,7 @@ def corrientes_stquo_2020(
     )
 
     # Simulation canvas
-    tipo_vivienda_agg_2020 = deepcopy(tipo_2020_geo[['link','total_viviendas','link_2001','link_2010','geometry']])
+    tipo_vivienda_agg_2020 = deepcopy(tipo_2020_geo[['total','link_2001','link_2010','geometry']])
 
     # Calibration vector (informal settlements surface)
     url = "https://storage.googleapis.com/python_mdg/censar_data/informal_settlements_072022.csv"
@@ -280,26 +334,26 @@ def corrientes_stquo_2020(
         crs=5347, 
         coarser_tot=False
     )
-
+    
     # Scenario main definition
     # 1. Combines aggregated indicators distributions observed by tract in 2001-2010 
     # 2. Percentage of informal settlement land within the tract (respecting the total informal area)
-    # 3. Porcentaje of housing informality in the city (5.95%) - this is the avg between 2001 and 2010 
+    # 3. Porcentaje of housing informality in the city (3.65%) # avg between 2001 and 2010 
     informal_simulated_distribution = simulate_cat_var(
         gdf_var_01=tipo_vivienda_agg_2001,
         gdf_var_10=tipo_vivienda_agg_2010,
         base_year="0110",
         forecast_year="2020",
-        forecast_gdf=tipo_vivienda_agg_2020, 
+        forecast_gdf=tipo_vivienda_agg_2020.reset_index(), #BUG FIX: better handling for idx_col
         pct_val=3.65,
         catname={"2001": "informal", "2010": "informal"},
-        tot_colname="total_viviendas",
+        tot_colname="total",
         calibration_vector={'weights':calibration_weights, 'mix_dist':True}
     )
-
+    
     if control_flow['allocation_method'] == 'avoid_relocations':
         # It avoids looses by census tract
-        tipo_vivienda_agg_2020["cat_sim"] = tipo_vivienda_agg_2020['link'].map(informal_simulated_distribution)
+        tipo_vivienda_agg_2020["cat_sim"] = tipo_vivienda_agg_2020.index.map(informal_simulated_distribution)
 
         # TODO: Feature design
         # Avoid dwelling units relocation
@@ -318,14 +372,12 @@ def corrientes_stquo_2020(
     
     # TODO: Feature design
     # Use upper limits to avoid exceding total when reproducing observed distributions
-    fix_total = tipo_vivienda_agg_2020.loc[tipo_vivienda_agg_2020['informal']>tipo_vivienda_agg_2020['total_viviendas'], 'total_viviendas']
-    tipo_vivienda_agg_2020.loc[tipo_vivienda_agg_2020['informal']>tipo_vivienda_agg_2020['total_viviendas'], 'informal'] = fix_total
+    fix_total = tipo_vivienda_agg_2020.loc[tipo_vivienda_agg_2020['informal']>tipo_vivienda_agg_2020['total'], 'total']
+    tipo_vivienda_agg_2020.loc[tipo_vivienda_agg_2020['informal']>tipo_vivienda_agg_2020['total'], 'informal'] = fix_total
     
     # TODO: Feature design
     # Simulate more than one category controlling total number of units in the area
-    tipo_vivienda_agg_2020['formal'] = tipo_vivienda_agg_2020['total_viviendas'] - tipo_vivienda_agg_2020['informal'] 
-    filter_cols = ['link', 'link_2001', 'link_2010', 'formal', 'informal', 'total_viviendas','geometry']
-    tipo_vivienda_agg_2020=tipo_vivienda_agg_2020[filter_cols].copy()
+    tipo_vivienda_agg_2020['formal'] = tipo_vivienda_agg_2020['total'] - tipo_vivienda_agg_2020['informal'] 
 
     scenario = {2001:tipo_vivienda_agg_2001, 
                 2010:tipo_vivienda_agg_2010, 

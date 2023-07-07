@@ -108,7 +108,6 @@ def distribute_totals_tract(tot_var, weights, catname, forecast_year, gdf):
 
     np.random.seed(1)
     drawn_tracts = choice(gdf_reset["link"], tot_var, p=weights)
-
     totals_tract = np.unique(drawn_tracts, return_counts=True)
     proj_totals = dict(zip(totals_tract[0], totals_tract[1]))
 
@@ -153,14 +152,18 @@ def observed_dist(catname, idx_col, base_year, gdf_base, gdf_forecast):
         catname = catname[base_year]
     tract_pct = gdf_base[catname] / gdf_base[catname].sum()
     cat_dist = dict(zip(tract_pct.index, tract_pct.values))
-    gdf_reset = gdf_forecast.reset_index()
-    var_pct = round(gdf_reset[idx_col].map(cat_dist).astype(float), 4)
-    gdf_reset[f"{catname}_{base_year}"] = var_pct
-    var_tract = dict(zip(gdf_reset[idx_col], gdf_reset[f"{catname}_{base_year}"]))
 
-    return var_tract
+    if gdf_forecast is not None:
+        gdf_reset = gdf_forecast.reset_index()
+        var_pct = round(gdf_reset[idx_col].map(cat_dist).astype(float), 4)
+        gdf_reset[f"{catname}_{base_year}"] = var_pct
+        var_tract = dict(zip(gdf_reset[idx_col], gdf_reset[f"{catname}_{base_year}"]))
+        return var_tract
 
+    else:
+        return cat_dist
 
+    
 def var_forecast(
     gdf_2001, gdf_2010, catname, gdf_2020, pct_target, base_year, 
     tot_colname, calibration_vector={'weights':None, 'mix_dist':False}):
@@ -243,6 +246,7 @@ def var_forecast(
                 gdf_base=data[year],
                 gdf_forecast=gdf_2020,
             )
+            
             gdf_2020[f"var_{year}"] = gdf_2020[idx_col_year].map(dist_dict)
 
         gdf_2020["var_0110"] = round(
@@ -273,16 +277,15 @@ def var_forecast(
 
 
 def simulate_total_var(
-    gdf_pers_01,
-    gdf_var_01,
-    gdf_pers_10,
-    gdf_var_10,
-    proy_df,
-    namedept,
     base_year,
     forecast_year,
+    estimate_totals,
     catname="total",
-):
+    gdf_pers_01=None,
+    gdf_var_01=None,
+    gdf_pers_10=None,
+    gdf_var_10=None,
+    ):
     """
     Distributes the projected number of households or residential units by tract
     following the same distribution in the most recent census information.
@@ -290,48 +293,55 @@ def simulate_total_var(
 
     Parameters
     ----------
-    gdf_pers_01 : gpd.GeoDataFrame
-        Geodataframe of 2001 Census with total number of persons by tract.
-    gdf_var_01 : gpd.GeoDataFrame
-        Geodataframe of 2001 Census 2001 with  household or residential units by tract.
-    gdf_pers_10 : gpd.GeoDataFrame
-        Geodataframe of 2010 Census with total number of persons by tract.
-    gdf_var_10 : gpd.GeoDataFrame
-        Geodataframe of 2010 Census 2001 with  household or residential units by tract.
     proyections_df : pd.DataFrame
         Dataframe with total persons forecasts by department and year.
-    namedept : str
-        Name of the department in the preyections dataframe.
-    base_year : str
-        Reference year to define persons to households/residential units ratio. If
-        none of 2001 or 2010 are selected, the average between them is used.
+    estimate_totals: dict
+        Rules to define the population total number to be distributed by tract
+        (e.g. {'proy_df': df, 'nomdepto': 'San Fernando'} | {'user_defined':140.000})
     forecast_year : str
         Year of projected total.
     catname : str, default 'total'
         Name of the output column by tract.
+    gdf_pers_01 : gpd.GeoDataFrame, default None
+        Geodataframe of 2001 Census with total number of persons by tract.
+    gdf_var_01 : gpd.GeoDataFrame, default None
+        Geodataframe of 2001 Census with  total households or residential units by tract.
+    gdf_pers_10 : gpd.GeoDataFrame, default None
+        Geodataframe of 2010 Census with total number of persons by tract.
+    gdf_var_10 : gpd.GeoDataFrame, default None
+        Geodataframe of 2010 Census with households or residential units by tract.
 
     Returns
     -------
     sim_dist:pd.Series
           Total number of households/residential units by tract.
     """
-    # Get number of households or residential units based on persons projection
-    proj_total = totals_forecast(
-        gdf_pers_01,
-        gdf_var_01,
-        gdf_pers_10,
-        gdf_var_10,
-        proy_df,
-        namedept,
-        base_year,
-        forecast_year,
-    )
+    if 'user_defined' in estimate_totals.keys():
+        print("Using population totals defined by the user")
+        proj_total = estimate_totals['user_defined']
+        weights = estimate_totals['weights']
+    
+    else:
+        print("Estimating population totals")
+        # Get number of households or residential units based on persons projection
+        proj_total = totals_forecast(
+            gdf_pers_01,
+            gdf_var_01,
+            gdf_pers_10,
+            gdf_var_10,
+            estimate_totals['proy_df'],
+            estimate_totals['namedept'],
+            base_year,
+            forecast_year,
+        )
+        weights = None
+    
     print(f"The total number of projected households/residential units is {proj_total}")
 
     # And follows the observed total households or residential units distribution in the 2010 tracts
     sim_dist = distribute_totals_tract(
         tot_var=proj_total,
-        weights=None,
+        weights=weights,
         catname=catname,
         forecast_year=forecast_year,
         gdf=gdf_var_10,

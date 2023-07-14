@@ -23,7 +23,7 @@ Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/
 </p>
 
 <p align="center">
-  <img src="CENSAr/img/informal_tracts_forecasting_ctes.png" alt="Informal dwellings by census radius corrientes"/>
+  <img src="CENSAr/img/informal_tracts_forecasting_corrientes.png" alt="Informal dwellings by census radius corrientes"/>
 </p>
   
 
@@ -49,7 +49,7 @@ Detect variable groups concentration with [clustering functionalities](https://g
 </p>
 
 <p align="center">
-  <img src="CENSAr/img/spatial_autocorrelation_ctes.png" alt="informal dwellings spatial correlation corrientes"/>
+  <img src="CENSAr/img/spatial_autocorrelation_corrientes.png" alt="informal dwellings spatial correlation corrientes"/>
 </p>
 
 ## Installation

@@ -1,5 +1,5 @@
 # `CENSAr` 
-## Urban growth analysis tools
+## Urban profiling toolkit
 
 Combines vector and raster data to study the physical and qualitatuve growth of urban areas. 
 
@@ -16,7 +16,7 @@ Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/C
 
 **2. Spatial distributions**
 
-Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions) based on vectorized census data (`2001`, `2010`, `2020`)
+Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions) using vectorized census data (`2001`, `2010`, `2020`)
 
 <p align="center">
   <img src="CENSAr/img/informal_tracts_forecasting_resis.png" alt="Informal dwellings by census radius resistencia"/>

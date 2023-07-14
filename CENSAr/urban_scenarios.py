@@ -105,6 +105,8 @@ def resistencia_stquo_2020(
         gdf_var_10=tipo_2010_geo
     )
 
+    # TODO: feature design. 
+    # Distribute totals with simulate_total_var considering the tract value in the last census period
     # status quo: avoid dwelling units relocation
     total_2010 = dict(zip(tipo_2010_geo.index, tipo_2010_geo.total))
     tipo_2020_geo['total_2010'] = tipo_2020_geo['link_2010'].map(total_2010)
@@ -200,7 +202,7 @@ def resistencia_stquo_2020(
 def corrientes_stquo_2020(
     path00: str, 
     path10: str, 
-    path_20: str,
+    path20: str,
     projected_population: int,
     control_flow: dict = {'allocation_method':'avoid_relocations'}):
     """
@@ -233,7 +235,7 @@ def corrientes_stquo_2020(
     # rasterdata_analysis outputs
     footprint_corrientes_00 = gpd.read_file(path00)
     footprint_corrientes_10 = gpd.read_file(path10)
-    footprint_corrientes_20 = gpd.read_file(path_20)
+    footprint_corrientes_20 = gpd.read_file(path20)
 
     # Loads census tracts within footprint limit
     corrientes_2001 = radios_prov(year=2001, prov="corrientes", mask=footprint_corrientes_00)
@@ -298,13 +300,16 @@ def corrientes_stquo_2020(
         gdf_var_10=tipo_2010_geo
     )
 
+    # TODO: feature design. 
+    # Distribute totals with simulate_total_var considering the tract value in the last census period
     # status quo: avoid dwelling units relocation
     total_2010 = dict(zip(tipo_2010_geo.index, tipo_2010_geo.total))
     tipo_2020_geo['total_2010'] = tipo_2020_geo['link_2010'].map(total_2010)
     tipo_2020_geo["diff"] = tipo_2020_geo["total"] - tipo_2020_geo["total_2010"] 
     neg_diff = tipo_2020_geo.loc[tipo_2020_geo['diff']< 0,['diff','total_2010']].copy()
     neg_diff['diff'] = neg_diff['diff'] * -1
-    tipo_2020_geo.loc[tipo_2020_geo['diff']< 0,'total'] = neg_diff.sum(axis=1)
+    # If new value is lower than 2010 tract value, then preserve this one  
+    tipo_2020_geo.loc[tipo_2020_geo['diff']< 0,'total'] = neg_diff['total_2010']
 
     print('Adjusted_total: {}'.format(tipo_2020_geo['total'].sum()))
     tipo_2020_geo.drop(columns=['total_2010','diff'], inplace=True)

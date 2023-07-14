@@ -66,7 +66,7 @@ def totals_forecast(
         ratio_01 = round(gdf_pers_01["total"].sum() / gdf_var_01["total"].sum(), 2)
         ratio_10 = round(gdf_pers_10["total"].sum() / gdf_var_10["total"].sum(), 2)
         ratio = round((ratio_01 + ratio_10) / 2, 2)
-
+    print("The ratio persons/dwelling units for {} is {}".format(base_year, ratio))
     proy_totpers = proyections_df.loc[namedept, forecast_year]
     tot_var = int(proy_totpers / ratio)
     return tot_var
@@ -438,6 +438,7 @@ def tracts_2020_to_2010(tracts_2020_gdf, tracts_2010_gdf):
     tracts_20_to_10 = gpd.sjoin(
         tracts_2020_gdf_rep, tracts_2010_gdf, predicate="within"
     )
+    
     tracts_20_to_10.rename(
         columns={"link_left": "link_2020", "link_right": "link_2010"}, inplace=True
     )

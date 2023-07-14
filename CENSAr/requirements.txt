@@ -1,12 +1,17 @@
-s<numpy >= 1.22.2
-pandas >= 1.4.1
-streamlit >= 1.1.0
-streamlit_folium >= 0.6.2
-matplotlib >= 3.4.3
-seaborn
-plotly
-plotly_express
-geopandas
-folium
-mapclassify
-rtree
+folium 
+geopandas 
+mapclassify 
+rtree 
+plotly 
+plotly_express 
+rasterio 
+scikit-image 
+pydantic 
+srsly 
+more_itertools 
+h3 
+h3pandas
+pysal
+nbformat
+rich
+../ 

@@ -1,0 +1,64 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/python-3
+{
+	"name": "CENSAr",
+	"initializeCommand": "make setup",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "devcontainer",
+	"runServices": [
+		"devcontainer"
+	],
+	"workspaceFolder": "/workspace",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"python.languageServer": "Pylance",
+				"editor.formatOnSave": true,
+				"python.formatting.provider": "none",
+				"python.formatting.blackArgs": [
+					"--line-length=88"
+				],
+				"python.linting.enabled": true,
+				"python.linting.flake8Path": "/usr/local/bin/flake8",
+				"python.linting.pylintArgs": [
+					"--generate-members"
+				],
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"editor.formatOnSave": true,
+					"editor.codeActionsOnSave": {
+						"source.organizeImports": true
+					}
+				},
+				"isort.args": [
+					"--profile",
+					"black"
+				],
+				"files.trimFinalNewlines": true,
+				"files.trimTrailingWhitespace": true,
+				"files.watcherExclude": {
+					"**/.git/objects/**": true,
+					"**/.git/subtree-cache/**": true
+				}
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.black-formatter",
+				"ms-python.isort",
+				"eamodio.gitlens",
+				"njpwerner.autodocstring",
+				"christian-kohler.path-intellisense",
+				"magicstack.magicpython",
+				"ms-toolsai.jupyter-renderers",
+				"VisualStudioExptTeam.vscodeintellicode",
+				"ms-toolsai.jupyter"
+			]
+		}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash /home/vscode/entrypoint.sh"
+}

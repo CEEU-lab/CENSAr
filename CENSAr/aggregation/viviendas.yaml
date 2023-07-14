@@ -1,0 +1,52 @@
+tipo vivienda particular:
+  mapping:
+    - name: formal
+      columns:
+        - departamento
+        - pieza en inquilinato
+        - pieza en hotel o pension
+        - vivienda movil
+      regex:
+        - "casa *"
+    - name: informal
+      columns:
+        - rancho
+        - casilla
+        - local no construido para habitacion
+    - name: situacion de calle
+      columns:
+        - persona viviendo en la calle
+        - en la calle
+
+vulnerabilidad urbana:
+  mapping:
+    - name: vulnerable
+      columns:
+        - informal
+        - situacion de calle
+    - name: no vulnerable
+      columns:
+        - formal
+
+calidad de conexiones a servicios:
+  mapping:
+    - name: insatisfactoria
+      columns:
+        - insuficiente
+    - name: satisfactoria
+      columns:
+        - satisfactoria
+        - básica
+
+calidad de los materiales:
+  mapping:
+    - name: aceptable
+      columns:
+        - calidad 1
+    - name: recuperable
+      columns:
+        - calidad 2
+    - name: irrecuperable
+      columns:
+        - calidad 3
+        - calidad 4

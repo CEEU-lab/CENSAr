@@ -1,22 +1,86 @@
-# CENSAr
-Esquemas de análisis poblacional
-> Este repositorio compila una serie de clases y métodos diseñados para descomponer un territorio urbano a partir de sus atributos censales. 
+# `CENSAr` 
+## Urban profiling toolkit
+
+Combines vector and raster data to study the physical and qualitatuve growth of urban areas. 
+
+**1. Imagery based indexes**
+
+Use the [raster data analysis](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/raster_data_analysis) module to solve classification problems. 
+
+*e.g.* **Urban Sprawl detection**
+
+<p align="center">
+  <img src="CENSAr/img/urban_extent_detection.png" alt="Urban Extent"/>
+</p>
 
 
-La Clase `ContextoUrbano` tiene por finalidad instanciar un tejido urbano y describirlo en función de sus atributos estructurales.
-e.g.
+**2. Spatial distributions**
 
-**Segregación Urbana**
+Simulate [tracts distributions](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_distributions) using vectorized census data (`2001`, `2010`, `2020`)
 
+<p align="center">
+  <img src="CENSAr/img/informal_tracts_forecasting_resis.png" alt="Informal dwellings by census radius resistencia"/>
+</p>
+
+<p align="center">
+  <img src="CENSAr/img/informal_tracts_forecasting_corrientes.png" alt="Informal dwellings by census radius corrientes"/>
+</p>
+  
+
+**3. Spatial features**
+
+Instatiate city objects and evaluate their [spatial distribution of attributes](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/spatial_features)
+
+*e.g.* **Spatial Dissimilitude**
+
+<p align="center">
+  <img src="CENSAr/img/spatial_dissimilitude_nea.png" alt="informal dwellings dissimilitude" width="600" height="300"/>
+</p>
+
+
+**4. Spatial autocorrelation**
+
+Detect variable groups concentration with [clustering functionalities](https://github.com/CEEU-lab/CENSAr/tree/develop/CENSAr/clustering)
+
+*e.g.* **Clusters detection**
+
+<p align="center">
+  <img src="CENSAr/img/spatial_autocorrelation_resis.png" alt="informal dwellings spatial correlation resistencia"/>
+</p>
+
+<p align="center">
+  <img src="CENSAr/img/spatial_autocorrelation_corrientes.png" alt="informal dwellings spatial correlation corrientes"/>
+</p>
+
+## Installation
+
+* Set up your python environment:
+
+``` shell
+> virtualenv myvenv --python=python3.10
+> source myvenv/bin/activate
 ```
-tejido_urbano = construye_territorio(gdf = polygons, # unidad administrativa inferior con atributo a ser evaluado
-                                     nombre_unidad_s = "COMUNA", # nombre de la unidad administrativa superior
-                                     nombre_unidad_i = "link", # nombre de la unidad administrativa inferior,
-                                     nombre_variable = "INMAT", # nombre de la variable a ser evaluada
-                                     nombre_categoria = "Recuperables"  # nombre de la categoría cuya distribución espacial se quiere verificar
-                                     )
+
+* Install the package
+
+``` shell
+> python setup.py install
+> pip install -r requirements.txt
 ```
 
-![segregacion](CENSAr/img/segregacion.png)
+or 
 
-Para mayor detalle sobre el uso de esta clase se puede revisar el [dashboard](https://github.com/CEEU-lab/CENSAr/blob/main/CENSAr/dashboard.py#L103-L113) realizado con `streamlit`.
+* Install the package in develop mode for constributions
+
+``` shell
+> python setup.py develop
+> pip install -r requirements-dev.txt
+```
+
+### Jupyter settings
+
+* Add your venv to jupyter kernels
+
+``` shell
+> ipython kernel install --name=myvenv --user
+```
